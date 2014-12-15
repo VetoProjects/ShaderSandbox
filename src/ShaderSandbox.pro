@@ -1,11 +1,11 @@
 isEqual(QT_MAJOR_VERSION, 4) || isEqual(QT_MINOR_VERSION, 1) {
-    message("Cannot build VetoLC with Qt version $$QT_VERSION.")
+    message("Cannot build ShaderSandbox with Qt version $$QT_VERSION.")
     error("Use at least Qt 5.2.")
 }
 
 QT       += core gui multimedia widgets
 
-TARGET = VeToLC
+TARGET = ShaderSandbox
 TEMPLATE = app
 win32:RC_ICONS += ../rc/Icon.ico
 ICON = ../rc/Icon.icns
@@ -56,7 +56,8 @@ HEADERS += Instances/IInstance.hpp \
     Renderer.hpp \
     SettingsBackend.hpp \
     SettingsTab.hpp \
-    SettingsWindow.hpp 
+    SettingsWindow.hpp \ 
+    ObjectLoaderDialog.hpp
 
 SOURCES += Instances/WindowInstance.cpp \
     AudioInputProcessor.cpp \
@@ -69,6 +70,7 @@ SOURCES += Instances/WindowInstance.cpp \
     Renderer.cpp \
     SettingsBackend.cpp \
     SettingsTab.cpp \
-    SettingsWindow.cpp
+    SettingsWindow.cpp \
+    ObjectLoaderDialog.cpp
 
 

@@ -10,9 +10,9 @@
  * and connects slots and signals. Needs a highlighting
  * file.
  */
-CodeEditor::CodeEditor(QWidget *parent, int file) : QPlainTextEdit(parent){
+CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent){
     lineHighlighting = new LineHighlighting(this);
-    syntaxEngine = new CodeHighlighter(this->document(), file);
+    syntaxEngine = new CodeHighlighter(this->document());
 
     connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updatelineHighlightingWidth()));
     connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updatelineHighlighting(QRect,int)));
@@ -172,18 +172,6 @@ void CodeEditor::highlightErroredLine(int lineno){
     selections.append(selection);
     setExtraSelections(selections);
 
-}
-
-/**
- * @brief CodeEditor::setHighlighting
- * @param highlighting
- *
- * Tells the syntax highlighter to change highlighting by
- * using a code where 0 and 3 stand for Python, 1 stands for Qt
- * and 2 stands for GLSL.
- */
-void CodeEditor::setHighlighting(int highlighting){
-    syntaxEngine->setupHighlighting(highlighting);
 }
 
 /**

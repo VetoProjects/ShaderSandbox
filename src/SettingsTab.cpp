@@ -171,9 +171,6 @@ BehaviourTab::BehaviourTab(QHash<QString, QVariant> *Settings, QWidget* parent) 
  */
 BehaviourTab::~BehaviourTab(){
     delete startup;
-    delete startupCompiler;
-    delete compilerChoiceLabel;
-    delete compilerChoice;
 }
 
 /**
@@ -189,56 +186,15 @@ void BehaviourTab::addLayout(){
     openCheck->setChecked(settings->value("OpenFiles").toBool());
     sizeCheck->setChecked(settings->value("RememberSize").toBool());
 
-    startupCompiler = new QButtonGroup(this);
-    rememberCompiler = new QCheckBox(tr("Remember Compiler that was used last"));
-    askForCompiler = new QCheckBox(tr("Always ask"));
-    startupCompiler->addButton(rememberCompiler);
-    startupCompiler->addButton(askForCompiler);
-
-    bool remember = settings->value("RememberCompiler").toBool();
-    rememberCompiler->setChecked(remember);
-    askForCompiler->setChecked(!remember);
-
-    connect(openCheck, SIGNAL(toggled(bool)), this, SLOT(openSlot(bool)));
-    connect(sizeCheck, SIGNAL(toggled(bool)), this, SLOT(sizeSlot(bool)));
-    connect(rememberCompiler, SIGNAL(toggled(bool)), this, SLOT(rememberCompilerSlot(bool)));
-
-    compiler = new QGroupBox(tr("Compiler to be used:"));
-
-    compilerChoiceLabel = new QLabel(tr("Compiler:"));
-    compilerChoice = new QComboBox;
-    compilerChoice->addItem(tr("AudioPython"));
-    compilerChoice->addItem(tr("AudioQT"));
-    compilerChoice->addItem(tr("GLSL"));
-    compilerChoice->addItem(tr("Python (Regular)"));
-
-    int useCompilerConfig = settings->value("UseCompiler").toInt();
-    if(useCompilerConfig >= 0 || useCompilerConfig <= 3)
-        compilerChoice->setCurrentIndex(useCompilerConfig);
-
-    connect(compilerChoice, SIGNAL(currentIndexChanged(int)), this, SLOT(useCompilerSlot(int)));
-
-    defaultPython = new QCheckBox(tr("Associate regular Python interpreter with *.py files"));
-    defaultPython->setChecked(settings->value("RegularPythonDefault").toBool());
-    connect(defaultPython, SIGNAL(toggled(bool)), this, SLOT(pythonSlot(bool)));
 
     startupLayout = new QVBoxLayout;
     startupLayout->addWidget(openCheck);
     startupLayout->addWidget(sizeCheck);
     startupLayout->addSpacing(10);
-    startupLayout->addWidget(rememberCompiler);
-    startupLayout->addWidget(askForCompiler);
     startup->setLayout(startupLayout);
-
-    compilerLayout = new QVBoxLayout;
-    compilerLayout->addWidget(compilerChoiceLabel);
-    compilerLayout->addWidget(compilerChoice);
-    compilerLayout->addWidget(defaultPython);
-    compiler->setLayout(compilerLayout);
 
     mainLayout = new QVBoxLayout;
     mainLayout->addWidget(startup);
-    mainLayout->addWidget(compiler);
     mainLayout->addSpacing(12);
     mainLayout->addStretch(1);
     setLayout(mainLayout);
@@ -267,44 +223,5 @@ void BehaviourTab::openSlot(bool toggled){
  */
 void BehaviourTab::sizeSlot(bool toggled){
     settings->insert("RememberSize", toggled);
-    Q_EMIT contentChanged();
-}
-
-/**
- * @brief BehaviourTab::rememberCompilerSlot
- * @param toggled
- *
- * SLOT that reacts to the toggled() SIGNAL of
- * rememberCompiler. Writes change to Hashlist and Q_EMITs
- * a contentChanged signal.
- */
-void BehaviourTab::rememberCompilerSlot(bool toggled){
-    settings->insert("RememberCompiler", toggled);
-    Q_EMIT contentChanged();
-}
-
-/**
- * @brief BehaviourTab::useCompilerSlot
- * @param index
- *
- * SLOT that reacts to the currentIndexChanged SIGNAL of
- * the Compiler drop down list. Writes change to Hashlist
- * and Q_EMITs a contentChanged signal.
- */
-void BehaviourTab::useCompilerSlot(int index){
-    settings->insert("UseCompiler", index);
-    Q_EMIT contentChanged();
-}
-
-/**
- * @brief BehaviourTab::rememberCompilerSlot
- * @param toggled
- *
- * SLOT that reacts to the toggled() SIGNAL of
- * pythonSlot. Writes change to Hashlist and Q_EMITs
- * a contentChanged signal.
- */
-void BehaviourTab::pythonSlot(bool toggled){
-    settings->insert("RegularPythonDefault", toggled);
     Q_EMIT contentChanged();
 }

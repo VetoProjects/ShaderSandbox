@@ -21,7 +21,7 @@ class CodeEditor : public QPlainTextEdit{
     Q_OBJECT
 
 public:
-    CodeEditor(QWidget *parent = 0, int file = 0);
+    CodeEditor(QWidget *parent = 0);
     void lineHighlightingPaintEvent(QPaintEvent *event);
     int lineHighlightingWidth();
     void highlightErroredLine(int);

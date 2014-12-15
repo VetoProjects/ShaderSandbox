@@ -4,6 +4,7 @@
 #include "Renderer.hpp"
 #include "BootLoader.hpp"
 #include "Instances/WindowInstance.hpp"
+#include "ObjectLoaderDialog.hpp"
 
 static const QString socketName = "VeTo";
 

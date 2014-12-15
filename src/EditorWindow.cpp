@@ -11,7 +11,7 @@
  * Also, it deals with platform-specific displaying quirks.
  */
 EditorWindow::EditorWindow(const QHash<QString, QVariant> &settings, QWidget *parent) : QMainWindow(parent){
-    codeEditor = new CodeEditor(this, settings.value("UseCompiler").toInt());
+    codeEditor = new CodeEditor(this);
     setCentralWidget(codeEditor);
 
     addActions();
@@ -21,8 +21,6 @@ EditorWindow::EditorWindow(const QHash<QString, QVariant> &settings, QWidget *pa
 
     connect(codeEditor->document(), SIGNAL(contentsChanged()), this, SLOT(docModified()));
 
-    templateNum = settings.value("UseCompiler").toInt();
-    pythonRegular = settings.value("RegularPythonDefault").toBool();
     applySettings(settings);
 
     // Mac quirks
@@ -93,10 +91,7 @@ void EditorWindow::newFile(){
     if(saveDialog()){
         codeEditor->clear();
         setAsCurrentFile("");
-        if(templateNum == 0)
-            loadFile(":/rc/template.py");
-        else if(templateNum == 2)
-            loadFile(":/rc/template.glsl");
+        loadFile(":/rc/template.glsl");
     }
 }
 
@@ -109,26 +104,8 @@ void EditorWindow::newFile(){
 void EditorWindow::openFile(){
     if(saveDialog()){
         QString fileName = QFileDialog::getOpenFileName(this);
-        if (!fileName.isEmpty()){
-            if(fileName.endsWith("py") && pythonRegular){
-                templateNum = 0;
-                codeEditor->setHighlighting(0);
-                Q_EMIT changedSetting(this, "UseCompiler", 3);
-            }else if(fileName.endsWith("py")){
-                templateNum = 0;
-                codeEditor->setHighlighting(0);
-                Q_EMIT changedSetting(this, "UseCompiler", 0);
-            }else if(fileName.endsWith("qml")){
-                templateNum = 1;
-                codeEditor->setHighlighting(1);
-                Q_EMIT changedSetting(this, "UseCompiler", 1);
-            }else if(fileName.endsWith("glsl")){
-                templateNum = 2;
-                codeEditor->setHighlighting(2);
-                Q_EMIT changedSetting(this, "UseCompiler", 2);
-            }
+        if (!fileName.isEmpty())
             loadFile(fileName);
-        }
     }
 }
 
@@ -246,10 +223,7 @@ void EditorWindow::applySettings(const QHash<QString, QVariant> &settings){
     }
     const QString file = settings.value("file", "").toString();
     if(file.isEmpty()){
-        if(templateNum == 0)
-            loadFile(":/rc/template.py");
-        else if(templateNum == 2)
-            loadFile(":/rc/template.glsl");
+        loadFile(":/rc/template.glsl");
         setAsCurrentFile("");
     } else
         loadFile(file);

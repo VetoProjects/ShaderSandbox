@@ -63,10 +63,6 @@ public Q_SLOTS:
     void instanceRequestSettings(IInstance *, QHash<QString, QVariant> &);
 //    void instanceRemoveID(IInstance *instance);
     void childSaidCloseAll();
-
-    void getExecutionResults(QtSoundThread*, QString);
-    void getExecutionResults(PySoundThread*, QString, int);
-    void getExecutionResults(PyLiveThread*, QString, int);
     void getExecutionResults(GlLiveThread*, QString);
 
     void getError(GlLiveThread*, QString, int);

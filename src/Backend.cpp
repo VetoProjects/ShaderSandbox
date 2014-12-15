@@ -315,27 +315,7 @@ void Backend::instanceRunCode(IInstance *instance)
 //                terminateThread(id);
         }
     }else{
-        bool ok;
-        int compiler = SettingsBackend::getSettingsFor("UseCompiler", -1, (int)id).toInt(&ok);
-        if(!ok)
-            compiler = -1;
-        switch(compiler){
-            case 0:
-                this->runPySoundFile(instance);
-                break;
-            case 1:
-                this->runQtSoundFile(instance);
-                break;
-            case 2:
-                this->runGlFile(instance);
-                break;
-            case 3:
-                this->runPyFile(instance);
-                break;
-            default:
-                instance->codeStopped();
-                instance->reportError(tr("Compiler not found."));
-        }
+        runGlFile(instance);
     }
 }
 
@@ -410,59 +390,6 @@ void Backend::instanceRequestSettings(IInstance *instance, QHash<QString, QVaria
 }
 
 /**
- * @brief Backend::runPyFile
- * @param filename
- * @param instructions
- * @param index
- *
- * Creates a thread that executes Python scripts.
- */
-void Backend::runPyFile(IInstance *instance){
-    PyLiveThread *thread = new PyLiveThread(instance->ID, this);
-    connect(thread, SIGNAL(doneSignal(PyLiveThread*, QString, int)),
-            this, SLOT(getExecutionResults(PyLiveThread*, QString, int)));
-    thread->initialize(instance->title(), instance->sourceCode());
-    thread->start();
-    threads.insert(thread->ID, thread);
-
-}
-
-/**
- * @brief Backend::runQtSoundFile
- * @param filename
- * @param instructions
- * @param index
- *
- * Creates a thread that executes QT sound scripts.
- */
-void Backend::runQtSoundFile(IInstance *instance){
-    QtSoundThread* thread = new QtSoundThread(instance->ID, this);
-    connect(thread, SIGNAL(doneSignal(QtSoundThread*, QString)),
-            this, SLOT(getExecutionResults(QtSoundThread*, QString)));
-    thread->initialize(instance->title(), instance->sourceCode());
-    thread->start();
-    threads.insert(thread->ID, thread);
-}
-
-/**
- * @brief Backend::runPySoundFile
- * @param filename
- * @param instructions
- * @param index
- *
- * Creates a thread that executes AudioPython scripts.
- */
-void Backend::runPySoundFile(IInstance *instance){
-    PySoundThread *thread = new PySoundThread(instance->ID, this);
-    connect(thread, SIGNAL(doneSignal(PySoundThread*, QString, int)),
-            this, SLOT(getExecutionResults(PySoundThread*, QString, int)));
-    thread->initialize(instance->title(), instance->sourceCode());
-    thread->start();
-    threads.insert(thread->ID, thread);
-
-}
-
-/**
  * @brief Backend::runGlFile
  * @param filename
  * @param instructions
@@ -487,28 +414,6 @@ void Backend::runGlFile(IInstance *instance){
  * reacts to the done SIGNAL by terminating the thread and
  * Q_EMITting a showResults SIGNAL for the QWidgets to display
  */
-void Backend::getExecutionResults(QtSoundThread* thread, QString returnedException){
-    disconnect(thread, SIGNAL(doneSignal(QtSoundThread*, QString)),
-            this, SLOT(getExecutionResults(QtSoundThread*, QString)));
-    instances[thread->ID]->reportWarning(returnedException);
-    terminateThread(thread->ID);
-}
-void Backend::getExecutionResults(PySoundThread* thread, QString returnedException, int lineno){
-    disconnect(thread, SIGNAL(doneSignal(PySoundThread*, QString, int)),
-            this, SLOT(getExecutionResults(PySoundThread*, QString, int)));
-    instances[thread->ID]->reportWarning(returnedException);
-    if(lineno >= 0)
-        instances[thread->ID]->highlightErroredLine(lineno);
-    terminateThread(thread->ID);
-}
-void Backend::getExecutionResults(PyLiveThread* thread, QString returnedException, int lineno){
-    disconnect(thread, SIGNAL(doneSignal(PyLiveThread*, QString, int)),
-            this, SLOT(getExecutionResults(PyLiveThread*, QString, int)));
-    instances[thread->ID]->reportWarning(returnedException);
-    if(lineno >= 0)
-        instances[thread->ID]->highlightErroredLine(lineno);
-    terminateThread(thread->ID);
-}
 void Backend::getExecutionResults(GlLiveThread* thread, QString returnedException){
     // Already gone?
     disconnect(thread, SIGNAL(doneSignal(GlLiveThread*, QString)),

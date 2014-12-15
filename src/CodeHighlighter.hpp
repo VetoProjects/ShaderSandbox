@@ -16,9 +16,8 @@ class CodeHighlighter : public QSyntaxHighlighter{
     Q_OBJECT
 
 public:
-    CodeHighlighter(QTextDocument *parent = 0, int file = 0);
-    bool setupHighlighting(int file);
-    int getHighlighting();
+    CodeHighlighter(QTextDocument *parent = 0);
+    void setupHighlighting();
 
 protected:
     void highlightBlock(const QString &text);
@@ -32,20 +31,11 @@ private:
         QTextCharFormat format;
     };
     QVector<Rule> Rules;
-    int python;
 
     QRegExp commentStartExpression;
     QRegExp commentEndExpression;
 
-//    QTextCharFormat keywordNotation;
-//    QTextCharFormat branchNotation;
-//    QTextCharFormat singleLineCommentNotation;
     QTextCharFormat multiLineCommentNotation;
-//    QTextCharFormat directiveNotation;
-//    QTextCharFormat glNotation;
-//    QTextCharFormat temporaryQtNotation;
-//    QTextCharFormat quotationNotation;
-//    QTextCharFormat digitNotation;
 };
 
 #endif

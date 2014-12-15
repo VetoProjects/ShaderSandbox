@@ -8,8 +8,8 @@
  * The constructor of the syntax highlighter.
  * Needs a highlighting file.
  */
-CodeHighlighter::CodeHighlighter(QTextDocument *parent, int file) : QSyntaxHighlighter(parent){
-    setupHighlighting(file);
+CodeHighlighter::CodeHighlighter(QTextDocument *parent) : QSyntaxHighlighter(parent){
+    setupHighlighting();
 }
 
 /**
@@ -22,17 +22,9 @@ CodeHighlighter::CodeHighlighter(QTextDocument *parent, int file) : QSyntaxHighl
  * TODO: Build quot-pairs ( "bla " bla " bla " -> all is highlighted)
  * TODO: don't let the multi line comment trust preview format (see function highlightBlock(...) )
  */
-bool CodeHighlighter::setupHighlighting(int file){
-    python = false;
+void CodeHighlighter::setupHighlighting(){
     QFile highlighting;
-    if(file == 0 || file == 3)
-        highlighting.setFileName(":/rc/highlighting/python");
-    else if(file == 1)
-        highlighting.setFileName(":/rc/highlighting/qt");
-    else if(file == 2)
-        highlighting.setFileName(":/rc/highlighting/glsl");
-    else
-        return false;
+    highlighting.setFileName(":/rc/highlighting/glsl");
     highlighting.open(QFile::ReadOnly | QFile::Text);
     Rule rule;
     Rules.clear();
@@ -70,96 +62,40 @@ bool CodeHighlighter::setupHighlighting(int file){
 
     QString filename = QFileInfo(highlighting.fileName()).fileName();
 
-    if(filename == "python"){
-        python = true;
+    // Single line comment
+    rule.format = QTextCharFormat();
+    rule.format.setForeground(Qt::darkGreen);
+    rule.pattern = QRegExp("//.*$");
+    Rules.append(rule);
 
-        //Fix this case
-        /*
-        rule.format = QTextCharFormat();
-        rule.format.setForeground(Qt::blue);
-        rule.pattern = QRegExp("(?<=raise.*)from");
-        Rules.append(rule);*/
+    // Multi line comment
+    // rule.format is already comment
+    multiLineCommentNotation = rule.format; // needed for later highlight
+    //work in progress; make for more elaborate matching
+    //commentStartExpression = QRegExp("[^/(//[^\\r\\n]+)]?/\\*");
+    commentStartExpression = QRegExp("/\\*");
+    commentEndExpression = QRegExp("\\*/");
 
-        // Single line comment
-        rule.format = QTextCharFormat();
-        rule.format.setForeground(Qt::darkGreen);
-        rule.pattern = QRegExp("^\\s*#.*$");
-        Rules.append(rule);
+    // Directive
+    rule.format = QTextCharFormat();
+    rule.format.setForeground(Qt::darkMagenta);
+    //highlight the whole line provided theres a # at the beginning
+    rule.pattern = QRegExp("^\\s*#.*$");
+    Rules.append(rule);
 
-        rule.format = QTextCharFormat();
-        rule.format.setForeground(Qt::darkMagenta);
-        rule.pattern = QRegExp("\\bimport\\b");
-        Rules.append(rule);
+    // GL
+    rule.format = QTextCharFormat();
+    //rule.format.setFontWeight(QFont::Bold);
+    rule.format.setForeground(Qt::darkCyan);
+    rule.pattern = QRegExp("\\b(GL|gl)(_)?[A-Za-z]+\\b");
+    Rules.append(rule);
 
-        rule.format = QTextCharFormat();
-        rule.format.setForeground(Qt::darkMagenta);
-        rule.pattern = QRegExp("\\s*from(?=.*import)");
-        Rules.append(rule);
-    }else if(filename == "glsl"){
-        // Single line comment
-        rule.format = QTextCharFormat();
-        rule.format.setForeground(Qt::darkGreen);
-        rule.pattern = QRegExp("//.*$");
-        Rules.append(rule);
-
-        // Multi line comment
-        // rule.format is already comment
-        multiLineCommentNotation = rule.format; // needed for later highlight
-        //work in progress; make for more elaborate matching
-        //commentStartExpression = QRegExp("[^/(//[^\\r\\n]+)]?/\\*");
-        commentStartExpression = QRegExp("/\\*");
-        commentEndExpression = QRegExp("\\*/");
-
-        // Directive
-        rule.format = QTextCharFormat();
-        rule.format.setForeground(Qt::darkMagenta);
-        //highlight the whole line provided theres a # at the beginning
-        rule.pattern = QRegExp("^\\s*#.*$");
-        Rules.append(rule);
-
-        // GL
-        rule.format = QTextCharFormat();
-        //rule.format.setFontWeight(QFont::Bold);
-        rule.format.setForeground(Qt::darkCyan);
-        rule.pattern = QRegExp("\\b(GL|gl)(_)?[A-Za-z]+\\b");
-        Rules.append(rule);
-   }else if(filename == "qt"){
-        // Single line comment
-        rule.format = QTextCharFormat();
-        rule.format.setForeground(Qt::darkGreen);
-        rule.pattern = QRegExp("//.*$");
-        Rules.append(rule);
-
-        // Multi line comment
-        // rule.format is already comment
-        multiLineCommentNotation = rule.format; // needed for later highlight
-        //work in progress; make for more elaborate matching
-        //commentStartExpression = QRegExp("[^/(//[^\\r\\n]+)]?/\\*");
-        commentStartExpression = QRegExp("/\\*");
-        commentEndExpression = QRegExp("\\*/");
-
-        // Directive
-        rule.format = QTextCharFormat();
-        rule.format.setForeground(Qt::darkMagenta);
-        //highlight the whole line provided theres a # at the beginning
-        rule.pattern = QRegExp("^\\s*#.*$");
-        Rules.append(rule);
-
-        // Temporary Qt
-        //temporary highlighting of QT; needed?
-        rule.format = QTextCharFormat();
-        //rule.format.setFontWeight(QFont::Bold);
-        rule.format.setForeground(Qt::darkCyan);
-        rule.pattern = QRegExp("\\bQ[A-Za-z]+\\b");
-        Rules.append(rule);
-    }
     // Quotation
     rule.format = QTextCharFormat();
     rule.format.setFontItalic(true);
     rule.format.setForeground(Qt::darkRed);
     rule.pattern = QRegExp("\"(\\\"|.)*\"");
     Rules.append(rule);
-    return true;
 }
 
 /**
@@ -187,35 +123,34 @@ void CodeHighlighter::highlightBlock(const QString &text){
     }
     setCurrentBlockState(0);
 
-    if(!python){
-        /*
-         * goes through the text once more for the slightly
-         * more complex multiline comment rule: searches for
-         * a start of the comment and the accoring end and
-         * highlights them and the text between.
-         *
-         * MAINTAINABILITY NOTES:
-         * Requires keeping track of three indices:
-         *      si = start index
-         *      ei = end index
-         *      commentLen = length of the comment(i.e. offset ; needed?)
-         */
-        int si = 0;
-        if(previousBlockState() != 1)
-            si = commentStartExpression.indexIn(text);
+   /*
+    * goes through the text once more for the slightly
+    * more complex multiline comment rule: searches for
+    * a start of the comment and the accoring end and
+    * highlights them and the text between.
+    *
+    * MAINTAINABILITY NOTES:
+    * Requires keeping track of three indices:
+    *      si = start index
+    *      ei = end index
+    *      commentLen = length of the comment(i.e. offset ; needed?)
+    */
+    int si = 0;
+    if(previousBlockState() != 1)
+        si = commentStartExpression.indexIn(text);
 
     // TODO: don't trust the preview format
-        while(si >= 0 && this->format(si) != multiLineCommentNotation){
-            int ei = commentEndExpression.indexIn(text, si);
-            int commentLen;
-            if(ei == -1){
-                setCurrentBlockState(1);
-                commentLen = text.length() - si;
-            }else
-                commentLen = ei - si + commentEndExpression.matchedLength();
+    while(si >= 0 && this->format(si) != multiLineCommentNotation){
+        int ei = commentEndExpression.indexIn(text, si);
+        int commentLen;
+        if(ei == -1){
+            setCurrentBlockState(1);
+            commentLen = text.length() - si;
+        }else
+            commentLen = ei - si + commentEndExpression.matchedLength();
 
-            setFormat(si, commentLen, multiLineCommentNotation);
-            si = commentStartExpression.indexIn(text, si + commentLen);
-        }
+        setFormat(si, commentLen, multiLineCommentNotation);
+        si = commentStartExpression.indexIn(text, si + commentLen);
     }
+
 }
