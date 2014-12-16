@@ -8,6 +8,8 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QDoubleSpinBox>
+#include <QMessageBox>
+#include <QDebug>
 
 /**
  * @brief The SettingsWindow class
@@ -28,7 +30,22 @@ private Q_SLOTS:
 
 private:
     void setupLayout();
-    QVBoxLayout* setupLoader();
+    void setupCoordinateBoxes();
+    QVBoxLayout* setupLoaderLayout();
+
+    QString objectFile;
+    double objectOffset[3];
+    double objectScaling[3];
+    double objectRotation[3];
+    QDoubleSpinBox* offsetBoxX;
+    QDoubleSpinBox* offsetBoxY;
+    QDoubleSpinBox* offsetBoxZ;
+    QDoubleSpinBox* scalingBoxX;
+    QDoubleSpinBox* scalingBoxY;
+    QDoubleSpinBox* scalingBoxZ;
+    QDoubleSpinBox* rotationBoxX;
+    QDoubleSpinBox* rotationBoxY;
+    QDoubleSpinBox* rotationBoxZ;
 };
 
 #endif // SETTINGSWINDOW

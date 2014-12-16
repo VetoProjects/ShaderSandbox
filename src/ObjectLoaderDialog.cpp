@@ -11,7 +11,8 @@ void ObjectLoaderDialog::setupLayout(){
     connect(loadBut, SIGNAL(clicked()), this, SLOT(load()));
     connect(closeBut, SIGNAL(clicked()), this, SLOT(close()));
 
-    QVBoxLayout* loader = setupLoader();
+    setupCoordinateBoxes();
+    QVBoxLayout* loader = setupLoaderLayout();
 
     QHBoxLayout* buttons = new QHBoxLayout;
     buttons->addStretch(1);
@@ -28,7 +29,19 @@ void ObjectLoaderDialog::setupLayout(){
     setWindowTitle(tr("ShaderSandbox | Load an Object"));
 }
 
-QVBoxLayout* ObjectLoaderDialog::setupLoader(){
+void ObjectLoaderDialog::setupCoordinateBoxes(){
+    offsetBoxX = new QDoubleSpinBox();
+    offsetBoxY = new QDoubleSpinBox();
+    offsetBoxZ = new QDoubleSpinBox();
+    scalingBoxX = new QDoubleSpinBox();
+    scalingBoxY = new QDoubleSpinBox();
+    scalingBoxZ = new QDoubleSpinBox();
+    rotationBoxX = new QDoubleSpinBox();
+    rotationBoxY = new QDoubleSpinBox();
+    rotationBoxZ = new QDoubleSpinBox();
+}
+
+QVBoxLayout* ObjectLoaderDialog::setupLoaderLayout(){
     QHBoxLayout* fileLayout = new QHBoxLayout();
 
     fileLayout->addWidget(new QLineEdit());
@@ -37,29 +50,29 @@ QVBoxLayout* ObjectLoaderDialog::setupLoader(){
     QHBoxLayout* offsetLayout = new QHBoxLayout();
     offsetLayout->addSpacing(5);
     offsetLayout->addWidget(new QLabel("x:"));
-    offsetLayout->addWidget(new QDoubleSpinBox());
+    offsetLayout->addWidget(offsetBoxX);
     offsetLayout->addWidget(new QLabel("y:"));
-    offsetLayout->addWidget(new QDoubleSpinBox());
+    offsetLayout->addWidget(offsetBoxY);
     offsetLayout->addWidget(new QLabel("z:"));
-    offsetLayout->addWidget(new QDoubleSpinBox());
+    offsetLayout->addWidget(offsetBoxZ);
 
     QHBoxLayout* scalingLayout = new QHBoxLayout();
     scalingLayout->addSpacing(5);
     scalingLayout->addWidget(new QLabel("x:"));
-    scalingLayout->addWidget(new QDoubleSpinBox());
+    scalingLayout->addWidget(scalingBoxX);
     scalingLayout->addWidget(new QLabel("y:"));
-    scalingLayout->addWidget(new QDoubleSpinBox());
+    scalingLayout->addWidget(scalingBoxY);
     scalingLayout->addWidget(new QLabel("z:"));
-    scalingLayout->addWidget(new QDoubleSpinBox());
+    scalingLayout->addWidget(scalingBoxZ);
 
     QHBoxLayout* rotationLayout = new QHBoxLayout();
     rotationLayout->addSpacing(5);
     rotationLayout->addWidget(new QLabel("x:"));
-    rotationLayout->addWidget(new QDoubleSpinBox());
+    rotationLayout->addWidget(rotationBoxX);
     rotationLayout->addWidget(new QLabel("y:"));
-    rotationLayout->addWidget(new QDoubleSpinBox());
+    rotationLayout->addWidget(rotationBoxY);
     rotationLayout->addWidget(new QLabel("z:"));
-    rotationLayout->addWidget(new QDoubleSpinBox());
+    rotationLayout->addWidget(rotationBoxZ);
 
     QVBoxLayout* coordinateLayout = new QVBoxLayout();
     coordinateLayout->addWidget(new QLabel("Offset of Object:"));
@@ -81,4 +94,21 @@ QVBoxLayout* ObjectLoaderDialog::setupLoader(){
     return mainLayout;
 }
 
-void ObjectLoaderDialog::load(){}
+void ObjectLoaderDialog::load(){
+    /*if(objectFile.isEmpty()){
+        QMessageBox::warning(this, tr("ShaderSandbox"), "File name cannot be empty.");
+        return;
+    }*/
+    // do something with input
+    objectOffset[0] = offsetBoxX->value();
+    objectOffset[1] = offsetBoxY->value();
+    objectOffset[2] = offsetBoxZ->value();
+    objectScaling[0] = scalingBoxX->value();
+    objectScaling[1] = scalingBoxY->value();
+    objectScaling[2] = scalingBoxZ->value();
+    objectRotation[0] = rotationBoxX->value();
+    objectRotation[1] = rotationBoxY->value();
+    objectRotation[2] = rotationBoxZ->value();
+    qDebug() << objectOffset << objectScaling << objectRotation;
+    close();
+}

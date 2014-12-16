@@ -66,5 +66,8 @@ int main(int argc, char *argv[]){
 
     a.setStyleSheet(QTextStream(&style).readAll());
 
+    ObjectLoaderDialog o;
+    o.show();
+
     return a.exec();
 }
