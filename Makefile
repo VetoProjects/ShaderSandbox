@@ -4,8 +4,8 @@ BUILDDIR=bin/ # Set this for different build dir
 TESTDIR=testbin/ # Set this for different testing dir
 DOXY=doxygen # Set this for non-default doxygen version
 
-TARGET=VetoLC
-TESTTARGET=VetoLCTest
+TARGET=ShaderSandbox
+TESTTARGET=ShaderSandboxTest
 SOURCES=$(wildcard src/*.c)
 TESTS=$(filter-out src/main.c, $(wildcard test/*.c src/*c))
 

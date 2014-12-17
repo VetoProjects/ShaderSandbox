@@ -1,6 +1,6 @@
 #include "SettingsBackend.hpp"
 
-const QString SettingsBackend::globalName = "VeTo";
+const QString SettingsBackend::globalName = "ShaderSandbox";
 const QString SettingsBackend::globalDir = "Live Code Editor";
 
 /**
