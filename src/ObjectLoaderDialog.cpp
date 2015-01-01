@@ -12,6 +12,7 @@ void ObjectLoaderDialog::setupLayout(){
     connect(closeBut, SIGNAL(clicked()), this, SLOT(close()));
 
     setupCoordinateBoxes();
+    setupFileChooser();
     QVBoxLayout* loader = setupLoaderLayout();
 
     QHBoxLayout* buttons = new QHBoxLayout;
@@ -41,11 +42,22 @@ void ObjectLoaderDialog::setupCoordinateBoxes(){
     rotationBoxZ = new QDoubleSpinBox();
 }
 
+void ObjectLoaderDialog::setupFileChooser(){
+    fileNameBox = new QLineEdit("");
+    fileChoosingButton = new QPushButton(tr("Select File..."));
+
+    connect(fileChoosingButton, SIGNAL(clicked()), this, SLOT(selectFile()));
+}
+
+void ObjectLoaderDialog::selectFile(){
+    fileNameBox->setText(QFileDialog::getOpenFileName(this));
+}
+
 QVBoxLayout* ObjectLoaderDialog::setupLoaderLayout(){
     QHBoxLayout* fileLayout = new QHBoxLayout();
 
-    fileLayout->addWidget(new QLineEdit());
-    fileLayout->addWidget(new QPushButton(tr("Select File...")));
+    fileLayout->addWidget(fileNameBox);
+    fileLayout->addWidget(fileChoosingButton);
 
     QHBoxLayout* offsetLayout = new QHBoxLayout();
     offsetLayout->addSpacing(5);
@@ -95,11 +107,16 @@ QVBoxLayout* ObjectLoaderDialog::setupLoaderLayout(){
 }
 
 void ObjectLoaderDialog::load(){
-    /*if(objectFile.isEmpty()){
+    objectFile = fileNameBox->text();
+    if(objectFile.isEmpty()){
         QMessageBox::warning(this, tr("ShaderSandbox"), "File name cannot be empty.");
         return;
-    }*/
-    // do something with input
+    }
+
+    if(!QFile(objectFile).exists()){
+        QMessageBox::warning(this, tr("ShaderSandbox"), "File name must be of a valid file.");
+        return;
+    }
     objectOffset[0] = offsetBoxX->value();
     objectOffset[1] = offsetBoxY->value();
     objectOffset[2] = offsetBoxZ->value();
@@ -109,6 +126,6 @@ void ObjectLoaderDialog::load(){
     objectRotation[0] = rotationBoxX->value();
     objectRotation[1] = rotationBoxY->value();
     objectRotation[2] = rotationBoxZ->value();
-    qDebug() << objectOffset << objectScaling << objectRotation;
+    qDebug() << objectFile << objectOffset[0] << objectScaling[0] << objectRotation[0];
     close();
 }

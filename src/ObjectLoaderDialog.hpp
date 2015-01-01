@@ -10,6 +10,7 @@
 #include <QDoubleSpinBox>
 #include <QMessageBox>
 #include <QDebug>
+#include <QFileDialog>
 
 /**
  * @brief The SettingsWindow class
@@ -27,16 +28,20 @@ public:
 
 private Q_SLOTS:
    void load();
+    void selectFile();
 
 private:
     void setupLayout();
     void setupCoordinateBoxes();
+    void setupFileChooser();
     QVBoxLayout* setupLoaderLayout();
 
     QString objectFile;
     double objectOffset[3];
     double objectScaling[3];
     double objectRotation[3];
+    QLineEdit* fileNameBox;
+    QPushButton* fileChoosingButton;
     QDoubleSpinBox* offsetBoxX;
     QDoubleSpinBox* offsetBoxY;
     QDoubleSpinBox* offsetBoxZ;
