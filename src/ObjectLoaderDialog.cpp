@@ -117,6 +117,7 @@ void ObjectLoaderDialog::load(){
         QMessageBox::warning(this, tr("ShaderSandbox"), "File name must be of a valid file.");
         return;
     }
+
     objectOffset[0] = offsetBoxX->value();
     objectOffset[1] = offsetBoxY->value();
     objectOffset[2] = offsetBoxZ->value();
