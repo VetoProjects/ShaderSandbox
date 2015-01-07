@@ -1,11 +1,6 @@
 #ifndef LIVETHREAD
 #define LIVETHREAD
 
-#ifdef WITH_PYTHON
-#include "PyLiveInterpreter.hpp"
-#include "PySoundGenerator.hpp"
-#endif
-
 #include <QThread>
 
 #include "Renderer.hpp"
@@ -58,6 +53,10 @@ public:
             return runObj->updateCode(filename, code);
         return false;
     }
+    bool loadModel(const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation){
+        runObj->loadModel(file, offset, scaling, rotation);
+    }
+
 public Q_SLOTS:
     void doneSignalReceived(QString exception){
         Q_EMIT doneSignal(this, exception);

@@ -39,6 +39,7 @@ public Q_SLOTS:
     bool updateCode(const QString &, const QString &);
     void updateAudioData(QByteArray);
     void onMessageLogged(QOpenGLDebugMessage message);
+    bool loadModel(const QString &, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation);
 
 protected:
     virtual bool event(QEvent *);
@@ -63,6 +64,8 @@ private:
     QMutex shaderProgramMutex;
     QString fragmentSource;
     QList<QOpenGLTexture*> textures;
+    QString modelFile;
+    QVector3D modelOffset, modelScaling, modelRotation;
 
     AudioInputProcessor *audio;
 

@@ -64,6 +64,7 @@ Renderer::Renderer(const QString &filename, const QString &instructions, QWindow
     vertexAttr(0), uvAttr(0), timeUniform(0),
     shaderProgram(0),
     fragmentSource(instructions),
+    model(0),
     textureRegEx("(^|\n|\r)\\s*#texture\\s+([A-Za-z_][A-Za-z0-9_]*)\\s+([^\n\r]+)")
 {
     setTitle(filename);
@@ -552,4 +553,24 @@ void Renderer::updateAudioData(QByteArray data){
  */
 void Renderer::onMessageLogged(QOpenGLDebugMessage message){
     qDebug() << message;
+}
+
+/**
+ * @brief Renderer::loadModel
+ * @param file Path to file, which contains the model that should be loaded
+ * @param offset Model position in 3D-Space
+ * @param scaling Model scaling in 3D-Space
+ * @param rotation Model rotation in 3D-Space
+ * @return True on success, otherwise false.
+ */
+bool Renderer::loadModel(const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation)
+{
+
+    // return false on error
+
+    modelFile = file;
+    modelOffset = offset;
+    modelScaling = scaling;
+    modelRotation = rotation;
+    return true;
 }

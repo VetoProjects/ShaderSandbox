@@ -68,10 +68,7 @@ public Q_SLOTS:
     void getError(GlLiveThread*, QString, int);
 
 private:
-    void runPyFile(IInstance *);
-    void runQtSoundFile(IInstance *);
     void runGlFile(IInstance *);
-    void runPySoundFile(IInstance *);
     void terminateThread(long id);
     QList<int> ids;
     QHash<long, IInstance*> instances;
