@@ -107,7 +107,7 @@ QVBoxLayout* ObjectLoaderDialog::setupLoaderLayout(){
 }
 
 void ObjectLoaderDialog::load(){
-    objectFile = fileNameBox->text();
+    QString objectFile = fileNameBox->text();
     if(objectFile.isEmpty()){
         QMessageBox::warning(this, tr("ShaderSandbox"), "File name cannot be empty.");
         return;
@@ -118,15 +118,10 @@ void ObjectLoaderDialog::load(){
         return;
     }
 
-    objectOffset[0] = offsetBoxX->value();
-    objectOffset[1] = offsetBoxY->value();
-    objectOffset[2] = offsetBoxZ->value();
-    objectScaling[0] = scalingBoxX->value();
-    objectScaling[1] = scalingBoxY->value();
-    objectScaling[2] = scalingBoxZ->value();
-    objectRotation[0] = rotationBoxX->value();
-    objectRotation[1] = rotationBoxY->value();
-    objectRotation[2] = rotationBoxZ->value();
-    qDebug() << objectFile << objectOffset[0] << objectScaling[0] << objectRotation[0];
+    QVector3D *objectOffset = new QVector3D(offsetBoxX->value(), offsetBoxY->value(), offsetBoxZ->value()),
+              *objectScaling = new QVector3D(scalingBoxX->value(), scalingBoxY->value(), scalingBoxZ->value()),
+              *objectRotation = new QVector3D(rotationBoxX->value(), rotationBoxY->value(), rotationBoxZ->value());
+
+    qDebug() << objectFile << objectOffset << objectScaling << objectRotation;
     close();
 }

@@ -11,6 +11,7 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QFileDialog>
+#include <QVector3D>
 
 /**
  * @brief The SettingsWindow class
@@ -36,10 +37,6 @@ private:
     void setupFileChooser();
     QVBoxLayout* setupLoaderLayout();
 
-    QString objectFile;
-    double objectOffset[3];
-    double objectScaling[3];
-    double objectRotation[3];
     QLineEdit* fileNameBox;
     QPushButton* fileChoosingButton;
     QDoubleSpinBox* offsetBoxX;
