@@ -32,14 +32,32 @@ void ObjectLoaderDialog::setupLayout(){
 
 void ObjectLoaderDialog::setupCoordinateBoxes(){
     offsetBoxX = new QDoubleSpinBox();
+    offsetBoxX->setMinimum(-1000);
+    offsetBoxX->setMaximum(1000);
     offsetBoxY = new QDoubleSpinBox();
+    offsetBoxY->setMinimum(-1000);
+    offsetBoxY->setMaximum(1000);
     offsetBoxZ = new QDoubleSpinBox();
+    offsetBoxZ->setMinimum(-1000);
+    offsetBoxZ->setMaximum(1000);
     scalingBoxX = new QDoubleSpinBox();
+    scalingBoxX->setValue(1.0);
+    scalingBoxX->setMaximum(1000);
     scalingBoxY = new QDoubleSpinBox();
+    scalingBoxY->setValue(1.0);
+    scalingBoxY->setMaximum(1000);
     scalingBoxZ = new QDoubleSpinBox();
+    scalingBoxZ->setValue(1.0);
+    scalingBoxZ->setMaximum(1000);
     rotationBoxX = new QDoubleSpinBox();
+    rotationBoxX->setMinimum(-1000);
+    rotationBoxX->setMaximum(1000);
     rotationBoxY = new QDoubleSpinBox();
+    rotationBoxY->setMinimum(-1000);
+    rotationBoxY->setMaximum(1000);
     rotationBoxZ = new QDoubleSpinBox();
+    rotationBoxZ->setMinimum(-1000);
+    rotationBoxZ->setMaximum(1000);
 }
 
 void ObjectLoaderDialog::setupFileChooser(){
