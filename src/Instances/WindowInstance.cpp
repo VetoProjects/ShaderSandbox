@@ -12,8 +12,17 @@ namespace Instances {
  */
 WindowInstance::WindowInstance(int id, const QHash<QString, QVariant> &settings, QObject *parent) : IInstance(id, parent)
 {
-    _window = 0;
+    window = 0;
     createWindow(settings);
+    objectLoaderDialog = new ObjectLoaderDialog();
+
+    connect(objectLoaderDialog, &ObjectLoaderDialog::objectInfo,
+        [this](const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation) {
+            this->loadModel(this, file, offset, scaling, rotation);
+        }
+    );
+
+    showObjectLoaderDialog();
 }
 
 /**
@@ -23,7 +32,8 @@ WindowInstance::WindowInstance(int id, const QHash<QString, QVariant> &settings,
  */
 WindowInstance::~WindowInstance()
 {
-    delete _window;
+    delete objectLoaderDialog;
+    delete window;
 }
 
 
@@ -35,7 +45,7 @@ WindowInstance::~WindowInstance()
  */
 QString WindowInstance::sourceCode() const
 {
-    return _window->getSourceCode();
+    return window->getSourceCode();
 }
 
 /**
@@ -46,7 +56,7 @@ QString WindowInstance::sourceCode() const
  */
 QString WindowInstance::title() const
 {
-    return _window->getTitle();
+    return window->getTitle();
 }
 
 /**
@@ -57,7 +67,7 @@ QString WindowInstance::title() const
  */
 void WindowInstance::reportError(const QString &message)
 {
-    _window->warningDisplay(message);
+    window->warningDisplay(message);
 }
 
 /**
@@ -68,7 +78,7 @@ void WindowInstance::reportError(const QString &message)
  */
 void WindowInstance::reportWarning(const QString &text)
 {
-    _window->showResults(text);
+    window->showResults(text);
 }
 
 /**
@@ -79,7 +89,7 @@ void WindowInstance::reportWarning(const QString &text)
  */
 void WindowInstance::highlightErroredLine(int lineno)
 {
-    _window->highlightErroredLine(lineno);
+    window->highlightErroredLine(lineno);
 }
 
 /**
@@ -90,7 +100,7 @@ void WindowInstance::highlightErroredLine(int lineno)
  */
 void WindowInstance::codeStopped()
 {
-    _window->codeStopped();
+    window->codeStopped();
 }
 
 /**
@@ -101,14 +111,14 @@ void WindowInstance::codeStopped()
  */
 bool WindowInstance::close()
 {
-    disconnect(_window, SIGNAL(closing(EditorWindow*)), this, SLOT(gotClosing(EditorWindow*)));
-    if(_window->close()){
-        disconnect(_window, SIGNAL(destroyed(QObject*)), this, SLOT(gotDestroying(QObject*))); // Prevent of call gotDestroying
-        _window->deleteLater();
-        _window = 0;
+    disconnect(window, SIGNAL(closing(EditorWindow*)), this, SLOT(gotClosing(EditorWindow*)));
+    if(window->close()){
+        disconnect(window, SIGNAL(destroyed(QObject*)), this, SLOT(gotDestroying(QObject*))); // Prevent of call gotDestroying
+        window->deleteLater();
+        window = 0;
         return true;
     }
-    connect(_window, SIGNAL(closing(EditorWindow*)), this, SLOT(gotClosing(EditorWindow*)));
+    connect(window, SIGNAL(closing(EditorWindow*)), this, SLOT(gotClosing(EditorWindow*)));
     return false;
 }
 
@@ -177,7 +187,7 @@ void WindowInstance::gotChangedSetting(EditorWindow *, const QString &key, const
 
 void WindowInstance::gotDestroying(QObject*)
 {
-    _window = 0;
+    window = 0;
     createWindow();
 }
 
@@ -209,19 +219,24 @@ void WindowInstance::gotStopCode(EditorWindow *)
  */
 void WindowInstance::createWindow(const QHash<QString,QVariant> &settings)
 {
-    if(!_window){
-        _window = new EditorWindow(settings);
-        connect(_window, SIGNAL(destroyed(QObject*))        , this, SLOT(gotDestroying(QObject*)));
-        connect(_window, SIGNAL(closing(EditorWindow*))     , this, SLOT(gotClosing(EditorWindow*)));
-        connect(_window, SIGNAL(closeAll(EditorWindow*))    , this, SLOT(gotCloseAll(EditorWindow*)));
-        connect(_window, SIGNAL(runCode(EditorWindow*))     , this, SLOT(gotRunCode(EditorWindow*)));
-        connect(_window, SIGNAL(stopCode(EditorWindow*))    , this, SLOT(gotStopCode(EditorWindow*)));
-        connect(_window, SIGNAL(openHelp(EditorWindow*))    , this, SLOT(gotOpenHelp(EditorWindow*)));
-        connect(_window, SIGNAL(openSettings(EditorWindow*)), this, SLOT(gotOpenSettings(EditorWindow*)));
-        connect(_window, SIGNAL(changedSetting(EditorWindow*,QString,QVariant)),         this, SLOT(gotChangedSetting(EditorWindow*,QString,QVariant)));
-        connect(_window, SIGNAL(changedSettings(EditorWindow*,QHash<QString,QVariant>)), this, SLOT(gotChangedSettings(EditorWindow*,QHash<QString,QVariant>)));
-        _window->show();
+    if(!window){
+        window = new EditorWindow(settings);
+        connect(window, SIGNAL(destroyed(QObject*))        , this, SLOT(gotDestroying(QObject*)));
+        connect(window, SIGNAL(closing(EditorWindow*))     , this, SLOT(gotClosing(EditorWindow*)));
+        connect(window, SIGNAL(closeAll(EditorWindow*))    , this, SLOT(gotCloseAll(EditorWindow*)));
+        connect(window, SIGNAL(runCode(EditorWindow*))     , this, SLOT(gotRunCode(EditorWindow*)));
+        connect(window, SIGNAL(stopCode(EditorWindow*))    , this, SLOT(gotStopCode(EditorWindow*)));
+        connect(window, SIGNAL(openHelp(EditorWindow*))    , this, SLOT(gotOpenHelp(EditorWindow*)));
+        connect(window, SIGNAL(openSettings(EditorWindow*)), this, SLOT(gotOpenSettings(EditorWindow*)));
+        connect(window, SIGNAL(changedSetting(EditorWindow*,QString,QVariant)),         this, SLOT(gotChangedSetting(EditorWindow*,QString,QVariant)));
+        connect(window, SIGNAL(changedSettings(EditorWindow*,QHash<QString,QVariant>)), this, SLOT(gotChangedSettings(EditorWindow*,QHash<QString,QVariant>)));
+        window->show();
     }
+}
+
+bool WindowInstance::showObjectLoaderDialog()
+{
+    objectLoaderDialog->show();
 }
 
 /**
@@ -231,7 +246,7 @@ void WindowInstance::createWindow(const QHash<QString,QVariant> &settings)
  */
 void WindowInstance::createWindow()
 {
-    if(!_window){
+    if(!window){
         QHash<QString, QVariant> settings;
         Q_EMIT getSettings(this, settings);
         createWindow(settings);

@@ -390,6 +390,21 @@ void Backend::instanceRequestSettings(IInstance *instance, QHash<QString, QVaria
 }
 
 /**
+ * @brief Backend::instanceLoadModel
+ * @param instance
+ * @param file
+ * @param offset
+ * @param scaling
+ * @param rotation
+ *
+ * Triggers the renderer to load a model
+ */
+void Backend::instanceLoadModel(IInstance *instance, const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation)
+{
+    threads[instance->ID]->loadModel(file, offset, scaling, rotation);
+}
+
+/**
  * @brief Backend::runGlFile
  * @param filename
  * @param instructions
@@ -412,7 +427,7 @@ void Backend::runGlFile(IInstance *instance){
  * @brief Backend::getExecutionResults
  *
  * reacts to the done SIGNAL by terminating the thread and
- * Q_EMITting a showResults SIGNAL for the QWidgets to display
+ * emitting a showResults SIGNAL for the QWidgets to display
  */
 void Backend::getExecutionResults(GlLiveThread* thread, QString returnedException){
     // Already gone?

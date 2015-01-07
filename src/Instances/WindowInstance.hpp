@@ -3,6 +3,7 @@
 
 #include "IInstance.hpp"
 #include "../EditorWindow.hpp"
+#include "../ObjectLoaderDialog.hpp"
 
 namespace Instances {
 /**
@@ -31,7 +32,9 @@ private:
 
     void createWindow();
     void createWindow(const QHash<QString, QVariant> &settings);
-    EditorWindow *_window;
+    bool showObjectLoaderDialog();
+    EditorWindow *window;
+    ObjectLoaderDialog *objectLoaderDialog;
 
 public Q_SLOTS:
     void gotDestroying(QObject*);

@@ -118,11 +118,11 @@ void ObjectLoaderDialog::load(){
         return;
     }
 
-    QVector3D *objectOffset = new QVector3D(offsetBoxX->value(), offsetBoxY->value(), offsetBoxZ->value()),
-              *objectScaling = new QVector3D(scalingBoxX->value(), scalingBoxY->value(), scalingBoxZ->value()),
-              *objectRotation = new QVector3D(rotationBoxX->value(), rotationBoxY->value(), rotationBoxZ->value());
+    QVector3D objectOffset(offsetBoxX->value(), offsetBoxY->value(), offsetBoxZ->value()),
+              objectScaling(scalingBoxX->value(), scalingBoxY->value(), scalingBoxZ->value()),
+              objectRotation(rotationBoxX->value(), rotationBoxY->value(), rotationBoxZ->value());
 
     qDebug() << objectFile << objectOffset << objectScaling << objectRotation;
-    Q_EMIT objectInfo(&objectFile, objectOffset, objectScaling, objectRotation);
+    Q_EMIT objectInfo(objectFile, objectOffset, objectScaling, objectRotation);
     close();
 }

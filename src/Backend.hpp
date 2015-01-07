@@ -29,7 +29,6 @@ public:
     explicit Backend(QObject *parent = 0);
     ~Backend();
     void addInstance(IInstance *, bool = true);
-    void createChild();
     void childExited(IInstance *, QString);
     bool isLast();
     bool removeInstance(IInstance*, bool = true);
@@ -61,6 +60,7 @@ public Q_SLOTS:
     void instanceRequestSetting(IInstance *, const QString &key, QVariant &value);
     void instanceChangedSettings(IInstance *, const QHash<QString, QVariant> &);
     void instanceRequestSettings(IInstance *, QHash<QString, QVariant> &);
+    void instanceLoadModel(IInstance*, const QString &, const QVector3D &, const QVector3D &, const QVector3D &);
 //    void instanceRemoveID(IInstance *instance);
     void childSaidCloseAll();
     void getExecutionResults(GlLiveThread*, QString);

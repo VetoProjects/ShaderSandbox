@@ -40,6 +40,7 @@ Q_SIGNALS:
     void changeSettings(IInstance *, const QHash<QString, QVariant> &);
     void getSetting(IInstance *, const QString &key, QVariant &value);
     void getSettings(IInstance *, QHash<QString, QVariant> &settings);
+    void loadModel(IInstance *, const QString&, const QVector3D&, const QVector3D&, const QVector3D&);
 
 protected:
     IInstance& operator=(const IInstance& rhs);

@@ -32,7 +32,7 @@ private Q_SLOTS:
     void selectFile();
 
 Q_SIGNALS:
-    void objectInfo(const QString&, const QVector3D&, const QVector3D&, const QVector3D&);
+    void objectInfo(const QString&, const QVector3D &, const QVector3D &, const QVector3D &);
 
 private:
     void setupLayout();

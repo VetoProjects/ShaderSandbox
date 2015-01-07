@@ -64,7 +64,6 @@ Renderer::Renderer(const QString &filename, const QString &instructions, QWindow
     vertexAttr(0), uvAttr(0), timeUniform(0),
     shaderProgram(0),
     fragmentSource(instructions),
-    model(0),
     textureRegEx("(^|\n|\r)\\s*#texture\\s+([A-Za-z_][A-Za-z0-9_]*)\\s+([^\n\r]+)")
 {
     setTitle(filename);

@@ -18,6 +18,7 @@ public:
     virtual void run() = 0;
     virtual void initialize(const QString &title, const QString &instructions) = 0;
     virtual bool updateCode(const QString &title, const QString &instructions) = 0;
+    virtual bool loadModel(const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation) = 0;
     const long ID;
 private:
     LiveThread& operator=(const LiveThread& rhs);
@@ -54,7 +55,7 @@ public:
         return false;
     }
     bool loadModel(const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation){
-        runObj->loadModel(file, offset, scaling, rotation);
+        return runObj->loadModel(file, offset, scaling, rotation);
     }
 
 public Q_SLOTS:
