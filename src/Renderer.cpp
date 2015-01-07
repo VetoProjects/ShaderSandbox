@@ -564,7 +564,7 @@ void Renderer::onMessageLogged(QOpenGLDebugMessage message){
  */
 bool Renderer::loadModel(const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation)
 {
-
+qDebug() << "load object:" << file << offset << scaling << rotation;
     // return false on error
 
     modelFile = file;

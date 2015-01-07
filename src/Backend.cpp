@@ -65,6 +65,7 @@ void Backend::addInstance(IInstance *instance, bool removeSettings){
     connect(instance, SIGNAL(closeAll()), this, SLOT(childSaidCloseAll()));
     connect(instance, SIGNAL(openSettings(IInstance*)), this, SLOT(settingsWindowRequested(IInstance*)));
     connect(instance, SIGNAL(openHelp(IInstance*)), this, SLOT(openHelp(IInstance*)));
+    connect(instance, &IInstance::loadModel, this, &Backend::instanceLoadModel);
     ids.append(id);
     saveIDs();
 }
@@ -401,7 +402,9 @@ void Backend::instanceRequestSettings(IInstance *instance, QHash<QString, QVaria
  */
 void Backend::instanceLoadModel(IInstance *instance, const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation)
 {
-    threads[instance->ID]->loadModel(file, offset, scaling, rotation);
+    qDebug() << "Backend";
+    if(threads.contains(instance->ID))
+        threads[instance->ID]->loadModel(file, offset, scaling, rotation);
 }
 
 /**

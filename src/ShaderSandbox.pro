@@ -16,7 +16,7 @@ TRANSLATIONS = ../translations/codeeditor_de.ts \
 
 CODECFORSRC     = UTF-8
 
-QMAKE_CXXFLAGS += -Wall -DNDEBUG -O2 -pedantic
+QMAKE_CXXFLAGS += -Wall -DNDEBUG -O1 -pedantic
 macx {
     QMAKE_CXXFLAGS += -stdlib=libc++ -mmacosx-version-min=10.7
 }

@@ -18,7 +18,11 @@ WindowInstance::WindowInstance(int id, const QHash<QString, QVariant> &settings,
 
     connect(objectLoaderDialog, &ObjectLoaderDialog::objectInfo,
         [this](const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation) {
-            this->loadModel(this, file, offset, scaling, rotation);
+            this->modelFile = file;
+            this->modelOffset = offset;
+            this->modelScaling = scaling;
+            this->modelRotation = rotation;
+            this->emitLoadModel();
         }
     );
 
@@ -199,6 +203,7 @@ void WindowInstance::gotDestroying(QObject*)
 void WindowInstance::gotRunCode(EditorWindow *)
 {
     Q_EMIT runCode(this);
+    emitLoadModel();
 }
 
 /**
@@ -237,6 +242,11 @@ void WindowInstance::createWindow(const QHash<QString,QVariant> &settings)
 bool WindowInstance::showObjectLoaderDialog()
 {
     objectLoaderDialog->show();
+}
+
+void WindowInstance::emitLoadModel()
+{
+    Q_EMIT loadModel(this, modelFile, modelOffset, modelScaling, modelRotation);
 }
 
 /**

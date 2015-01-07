@@ -55,6 +55,7 @@ public:
         return false;
     }
     bool loadModel(const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation){
+        qDebug() << "Thread";
         return runObj->loadModel(file, offset, scaling, rotation);
     }
 
