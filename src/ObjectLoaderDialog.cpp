@@ -123,5 +123,6 @@ void ObjectLoaderDialog::load(){
               *objectRotation = new QVector3D(rotationBoxX->value(), rotationBoxY->value(), rotationBoxZ->value());
 
     qDebug() << objectFile << objectOffset << objectScaling << objectRotation;
+    Q_EMIT objectInfo(&objectFile, objectOffset, objectScaling, objectRotation);
     close();
 }

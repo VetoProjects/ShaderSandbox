@@ -31,6 +31,9 @@ private Q_SLOTS:
    void load();
     void selectFile();
 
+Q_SIGNALS:
+    void objectInfo(const QString&, const QVector3D&, const QVector3D&, const QVector3D&);
+
 private:
     void setupLayout();
     void setupCoordinateBoxes();
