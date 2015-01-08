@@ -57,7 +57,8 @@ HEADERS += Instances/IInstance.hpp \
     SettingsBackend.hpp \
     SettingsTab.hpp \
     SettingsWindow.hpp \ 
-    ObjectLoaderDialog.hpp
+    ObjectLoaderDialog.hpp \
+    Model3D.hpp
 
 SOURCES += Instances/WindowInstance.cpp \
     AudioInputProcessor.cpp \
@@ -71,6 +72,7 @@ SOURCES += Instances/WindowInstance.cpp \
     SettingsBackend.cpp \
     SettingsTab.cpp \
     SettingsWindow.cpp \
-    ObjectLoaderDialog.cpp
+    ObjectLoaderDialog.cpp \
+    Model3D.cpp
 
 

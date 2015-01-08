@@ -14,6 +14,7 @@
 #include <QMutex>
 
 #include "AudioInputProcessor.hpp"
+#include "Model3D.hpp"
 
 /**
  * @brief The Renderer class
@@ -66,6 +67,7 @@ private:
     QList<QOpenGLTexture*> textures;
     QString modelFile;
     QVector3D modelOffset, modelScaling, modelRotation;
+    Model3D model;
 
     AudioInputProcessor *audio;
 
