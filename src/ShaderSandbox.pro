@@ -16,7 +16,7 @@ TRANSLATIONS = ../translations/codeeditor_de.ts \
 
 CODECFORSRC     = UTF-8
 
-QMAKE_CXXFLAGS += -Wall -DNDEBUG -O2 -pedantic
+QMAKE_CXXFLAGS += -Wall -DNDEBUG -O1 -pedantic
 macx {
     QMAKE_CXXFLAGS += -stdlib=libc++ -mmacosx-version-min=10.7
 }
@@ -57,7 +57,8 @@ HEADERS += Instances/IInstance.hpp \
     SettingsBackend.hpp \
     SettingsTab.hpp \
     SettingsWindow.hpp \ 
-    ObjectLoaderDialog.hpp
+    ObjectLoaderDialog.hpp \
+    Model3D.hpp
 
 SOURCES += Instances/WindowInstance.cpp \
     AudioInputProcessor.cpp \
@@ -71,6 +72,7 @@ SOURCES += Instances/WindowInstance.cpp \
     SettingsBackend.cpp \
     SettingsTab.cpp \
     SettingsWindow.cpp \
-    ObjectLoaderDialog.cpp
+    ObjectLoaderDialog.cpp \
+    Model3D.cpp
 
 

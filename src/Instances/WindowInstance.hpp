@@ -33,8 +33,11 @@ private:
     void createWindow();
     void createWindow(const QHash<QString, QVariant> &settings);
     bool showObjectLoaderDialog();
+    void emitLoadModel();
     EditorWindow *window;
     ObjectLoaderDialog *objectLoaderDialog;
+    QString modelFile;
+    QVector3D modelOffset, modelScaling, modelRotation;
 
 public Q_SLOTS:
     void gotDestroying(QObject*);

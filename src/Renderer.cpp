@@ -333,6 +333,19 @@ void Renderer::render(){
         shaderProgram->bind();
         vao->bind();
 
+// TODO: Find good start M, V and P (M from dialog, V and P by mouse / keyboard control?)
+// TODO: Light source
+// TODO: compile users vertex shader
+
+//        QMatrix4x4
+//            M,
+//            MV  = V * M,
+//            MVP = P * MV;
+//        glUniformMatrix4fv(_data->M,   1, GL_FALSE, &M  [0][0]);
+//        glUniformMatrix4fv(_data->MV,  1, GL_FALSE, &MV [0][0]);
+//        glUniformMatrix4fv(_data->MVP, 1, GL_FALSE, &MVP[0][0]);
+//        model.draw();
+
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_1D, audioLeftTexture);
@@ -564,8 +577,9 @@ void Renderer::onMessageLogged(QOpenGLDebugMessage message){
  */
 bool Renderer::loadModel(const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation)
 {
-
-    // return false on error
+qDebug() << "load object:" << file << offset << scaling << rotation;
+    if(!model.loadModel(file.toStdString(), true))
+        return false;
 
     modelFile = file;
     modelOffset = offset;
