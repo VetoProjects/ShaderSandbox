@@ -13,6 +13,7 @@
 #include <QSplitter>
 
 #include "CodeEditor.hpp"
+#include "ObjectLoaderDialog.hpp"
 
 /**
  * @brief The EditorWindow class
@@ -51,6 +52,7 @@ private Q_SLOTS:
     void gotOpenHelp();
     void gotOpenSettings();
     void gotCloseAll();
+    bool showObjectLoaderDialog();
 
 Q_SIGNALS:
     void closing(EditorWindow *);
@@ -62,6 +64,7 @@ Q_SIGNALS:
     void titleChanged(EditorWindow *);
     void changedSetting(EditorWindow *, const QString &, const QVariant &);
     void changedSettings(EditorWindow *, const QHash<QString, QVariant> &);
+    void loadModel(const QString &, const QVector3D &, const QVector3D &, const QVector3D &);
 
 private:
     EditorWindow& operator=(const EditorWindow& rhs);
@@ -98,6 +101,11 @@ private:
     QAction *runAction;
     QAction *settingsAction;
     QAction *helpAction;
+    QAction *loadObjectAction;
+
+    QString modelFile;
+    QVector3D modelOffset, modelScaling, modelRotation;
+    ObjectLoaderDialog *objectLoaderDialog;
 };
 
 #endif // EDITORWINDOW

@@ -11,6 +11,19 @@
  * Also, it deals with platform-specific displaying quirks.
  */
 EditorWindow::EditorWindow(const QHash<QString, QVariant> &settings, QWidget *parent) : QMainWindow(parent){
+    objectLoaderDialog = new ObjectLoaderDialog();
+
+    connect(objectLoaderDialog, &ObjectLoaderDialog::objectInfo,
+        [this](const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation) {
+            this->modelFile = file;
+            this->modelOffset = offset;
+            this->modelScaling = scaling;
+            this->modelRotation = rotation;
+            Q_EMIT loadModel(file, offset, scaling, rotation);
+        }
+    );
+
+    showObjectLoaderDialog();
     vertexCodeEditor = new CodeEditor(this);
     fragmentCodeEditor = new CodeEditor(this);
 
@@ -57,11 +70,13 @@ EditorWindow::~EditorWindow(){
     delete runAction;
     delete settingsAction;
     delete helpAction;
+    delete loadObjectAction;
     delete fMenu;
     delete eMenu;
     delete hMenu;
     delete fileBar;
     delete editBar;
+    delete objectLoaderDialog;
 }
 
 /**
@@ -88,6 +103,13 @@ void EditorWindow::gotOpenHelp()
 void EditorWindow::gotCloseAll()
 {
     Q_EMIT closeAll(this);
+}
+
+bool EditorWindow::showObjectLoaderDialog()
+{
+    objectLoaderDialog->show();
+    // TODO: return value?
+    return true;
 }
 
 /**
@@ -254,7 +276,8 @@ void EditorWindow::applySettings(const QHash<QString, QVariant> &settings){
  */
 void EditorWindow::runFile(){
     runAction->setIcon(QIcon(":/images/refresh.png"));
-    runCode(this);
+    Q_EMIT runCode(this);
+    Q_EMIT loadModel(modelFile, modelOffset, modelScaling, modelRotation);
 }
 
 /**
@@ -339,6 +362,10 @@ void EditorWindow::addActions(){
     helpAction->setShortcuts(QKeySequence::HelpContents);
     helpAction->setStatusTip(tr("Opens the Help"));
     connect(helpAction, SIGNAL(triggered()), this, SLOT(gotOpenHelp()));
+
+    loadObjectAction = new QAction(tr("Load Object"), this);
+    loadObjectAction->setStatusTip(tr("Loads an object in your 3D-Word"));
+    connect(loadObjectAction, SIGNAL(triggered()), objectLoaderDialog, SLOT(show()));
 }
 
 /**
@@ -380,6 +407,7 @@ void EditorWindow::addToolBars(){
     editBar = addToolBar(tr("Edit"));
     fileBar->addAction(settingsAction);
     fileBar->addAction(runAction);
+    fileBar->addAction(loadObjectAction);
 }
 
 /**
@@ -427,8 +455,8 @@ bool EditorWindow::saveDialog(){
 void EditorWindow::loadFile(const QString &path){
     QFileInfo fileInfo(path);
     QString suffix = fileInfo.suffix().toLower();
-    bool vertexFile = (suffix == "vert" || suffix == "vertex" || suffix == "vertexshader");
-    bool fragmentFile = (suffix == "frag" || suffix == "fragment" || suffix == "fragmentshader");
+    bool vertexFile = (suffix == "vs" || suffix == "vert" || suffix == "vertex" || suffix == "vertexshader");
+    bool fragmentFile = (suffix == "fs" || suffix == "frag" || suffix == "fragment" || suffix == "fragmentshader");
 
     if(!vertexFile && !fragmentFile){
         QString msg = tr("File must be suffixed with vert, vertex, vertexshader, frag, fragment or fragmentshader.");

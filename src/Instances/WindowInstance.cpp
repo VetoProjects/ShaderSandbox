@@ -14,19 +14,6 @@ WindowInstance::WindowInstance(int id, const QHash<QString, QVariant> &settings,
 {
     window = 0;
     createWindow(settings);
-    objectLoaderDialog = new ObjectLoaderDialog();
-
-    connect(objectLoaderDialog, &ObjectLoaderDialog::objectInfo,
-        [this](const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation) {
-            this->modelFile = file;
-            this->modelOffset = offset;
-            this->modelScaling = scaling;
-            this->modelRotation = rotation;
-            this->emitLoadModel();
-        }
-    );
-
-    showObjectLoaderDialog();
 }
 
 /**
@@ -36,7 +23,6 @@ WindowInstance::WindowInstance(int id, const QHash<QString, QVariant> &settings,
  */
 WindowInstance::~WindowInstance()
 {
-    delete objectLoaderDialog;
     delete window;
 }
 
@@ -208,7 +194,6 @@ void WindowInstance::gotDestroying(QObject*)
 void WindowInstance::gotRunCode(EditorWindow *)
 {
     Q_EMIT runCode(this);
-    emitLoadModel();
 }
 
 /**
@@ -240,20 +225,11 @@ void WindowInstance::createWindow(const QHash<QString,QVariant> &settings)
         connect(window, SIGNAL(openSettings(EditorWindow*)), this, SLOT(gotOpenSettings(EditorWindow*)));
         connect(window, SIGNAL(changedSetting(EditorWindow*,QString,QVariant)),         this, SLOT(gotChangedSetting(EditorWindow*,QString,QVariant)));
         connect(window, SIGNAL(changedSettings(EditorWindow*,QHash<QString,QVariant>)), this, SLOT(gotChangedSettings(EditorWindow*,QHash<QString,QVariant>)));
+        connect(window, &EditorWindow::loadModel, [=](const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation){
+            Q_EMIT loadModel(this, file, offset, scaling, rotation);
+        });
         window->show();
     }
-}
-
-bool WindowInstance::showObjectLoaderDialog()
-{
-    objectLoaderDialog->show();
-    // TODO: return value?
-    return true;
-}
-
-void WindowInstance::emitLoadModel()
-{
-    Q_EMIT loadModel(this, modelFile, modelOffset, modelScaling, modelRotation);
 }
 
 /**
