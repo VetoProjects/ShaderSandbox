@@ -11,10 +11,9 @@
 class Model3D : protected QOpenGLFunctions{
 public:
     Model3D();
-    Model3D(const std::string &path, bool smooth = true);
-
     ~Model3D();
 
+    bool init();
     bool loadModel(const std::string &path, bool smooth = true);
     void draw();
 

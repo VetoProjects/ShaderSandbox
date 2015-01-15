@@ -27,7 +27,7 @@ class Renderer : public QWindow, protected QOpenGLFunctions
     Q_OBJECT
 public:
     explicit Renderer(QWindow *parent = 0);
-    explicit Renderer(const QString &, const QString &, QWindow *parent = 0);
+    explicit Renderer(const QString &, const QString &vertexShader, const QString &fragmentShader, QWindow *parent = 0);
     ~Renderer();
 
 Q_SIGNALS:
@@ -37,10 +37,11 @@ Q_SIGNALS:
 public Q_SLOTS:
     void renderNow();
     void renderLater();
-    bool updateCode(const QString &, const QString &);
+    bool updateCode(const QString &, const QString &, const QString &);
     void updateAudioData(QByteArray);
     void onMessageLogged(QOpenGLDebugMessage message);
     bool loadModel(const QString &, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation);
+    void uploadMVP();
 
 protected:
     virtual bool event(QEvent *);
@@ -49,8 +50,8 @@ protected:
 private:
     bool init();
     void render();
-    bool initShaders(QString);
-    QString currentFile;
+    bool initShaders(QString, QString);
+    QString currentPath;
     QColor clearColor;
     QOpenGLContext *context;
     QOpenGLPaintDevice *device;
@@ -60,14 +61,16 @@ private:
     QOpenGLVertexArrayObject *vao;
     GLuint vertexBuffer, uvBuffer, audioLeftTexture, audioRightTexture;
     GLint vertexAttr, uvAttr,
-        timeUniform, mouseUniform, rationUniform, samplerLeft, samplerRight;
+        timeUniform, mouseUniform, rationUniform, samplerLeft, samplerRight,
+        pID, vID, mID, mvID, mvpID;
     QOpenGLShaderProgram *shaderProgram;
     QMutex shaderProgramMutex;
-    QString fragmentSource;
+    QString vertexSource, fragmentSource;
     QList<QOpenGLTexture*> textures;
     QString modelFile;
     QVector3D modelOffset, modelScaling, modelRotation;
     Model3D model;
+    QMatrix4x4 P, V, M, MV, MVP;
 
     AudioInputProcessor *audio;
 
@@ -78,7 +81,7 @@ private:
 //    static bool mapFormat(float *target, char *source, int count, const QAudioFormat &format);
 //    template <typename T>
 //    static void convertArray(float *target, const T *source, int count, qreal div, qreal sub = 0);
-    static const char *defaultVertexShader, *defaultFragmentShader;
+    static const QString defaultVertexShader, defaultFragmentShader;
 };
 
 #endif // RENDERER_HPP

@@ -6,9 +6,11 @@
         <file>images/settings.png</file>
         <file>images/run.png</file>
         <file>images/refresh.png</file>
+        <file>images/x.png</file>
         <file>fonts/Inconsolata.otf</file>
         <file>rc/highlighting/glsl</file>
         <file>rc/template.glsl</file>
-        <file>images/x.png</file>
+        <file>rc/template.vert</file>
+        <file>rc/template.frag</file>
     </qresource>
 </RCC>

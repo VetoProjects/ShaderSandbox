@@ -10,21 +10,8 @@
 
 using namespace std;
 
-Model3D::Model3D(){
-    vao = new QOpenGLVertexArrayObject();
-    vao->create();
-    vao->bind();
-    glGenBuffers(1, &vertexBuffer);
-    glGenBuffers(1, &uvBuffer);
-    glGenBuffers(1, &normalBuffer);
-    glGenBuffers(1, &indexBuffer);
-}
-
-Model3D::Model3D(const std::string &path, bool smooth) : Model3D(){
-//    if(!loadFile(path))
-//        throw
-    loadModel(path, smooth);
-}
+Model3D::Model3D() : vao(0), vertexBuffer(0), uvBuffer(0), normalBuffer(0), indexBuffer(0)
+{ }
 
 Model3D::~Model3D(){
     glDeleteBuffers(1, &vertexBuffer);
@@ -32,6 +19,18 @@ Model3D::~Model3D(){
     glDeleteBuffers(1, &normalBuffer);
     glDeleteBuffers(1, &indexBuffer);
     delete vao;
+}
+
+bool Model3D::init(){
+    initializeOpenGLFunctions();
+    vao = new QOpenGLVertexArrayObject();
+    vao->create();
+    vao->bind();
+    glGenBuffers(1, &vertexBuffer);
+    glGenBuffers(1, &uvBuffer);
+    glGenBuffers(1, &normalBuffer);
+    glGenBuffers(1, &indexBuffer);
+    return true;
 }
 
 bool Model3D::loadModel(const std::string &path, bool smooth){
@@ -55,7 +54,7 @@ bool Model3D::loadModel(const std::string &path, bool smooth){
             QVector3D vertex;
             lineStream >> vertex[0] >> vertex[1] >> vertex[2];
             if(lineStream.fail()){
-                cerr << "Faild to parse file (vertex): " << path << "." << endl;
+//                cerr << "Faild to parse file (vertex): " << path << "." << endl;
                 file.close();
                 return false;
             }
@@ -64,7 +63,7 @@ bool Model3D::loadModel(const std::string &path, bool smooth){
             QVector2D uv;
             lineStream >> uv[0] >> uv[1];
             if(lineStream.fail()){
-                cerr << "Faild to parse file (uv): " << path << "." << endl;
+//                cerr << "Faild to parse file (uv): " << path << "." << endl;
                 file.close();
                 return false;
             }
@@ -74,7 +73,7 @@ bool Model3D::loadModel(const std::string &path, bool smooth){
             QVector3D normal;
             lineStream >> normal[0] >> normal[1] >> normal[2];
             if(lineStream.fail()){
-                cerr << "Faild to parse file (normal): " << path << "." << endl;
+//                cerr << "Faild to parse file (normal): " << path << "." << endl;
                 file.close();
                 return false;
             }
@@ -168,7 +167,7 @@ bool Model3D::loadModel(const std::string &path, bool smooth){
             for(short edge : {0, 1, 2})
                 normals[i + edge] = normal[edge];
         }
-    // cout << "reused: " << reused << endl;
+//    cout << "reused: " << reused << endl;
     pushData(vertices, uvs, normals, vertex_indices);
 
     return true;
@@ -204,6 +203,9 @@ void Model3D::pushData(const std::vector<GLfloat> &vertices, const std::vector<G
 }
 
 void Model3D::draw(){
+    if(!vao)
+        return;
+
     vao->bind();
 
 

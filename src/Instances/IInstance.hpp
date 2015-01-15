@@ -23,7 +23,8 @@ public:
     virtual void reportWarning(const QString &) = 0;
     virtual void codeStopped() = 0;
     virtual void highlightErroredLine(int) = 0;
-    virtual QString sourceCode() const = 0;
+    virtual QString vertexSourceCode() const = 0;
+    virtual QString fragmentSourceCode() const = 0;
     virtual QString title() const = 0;
 
 Q_SIGNALS:

@@ -10,6 +10,7 @@
 #include <QFileDialog>
 #include <QMenuBar>
 #include <QStatusBar>
+#include <QSplitter>
 
 #include "CodeEditor.hpp"
 
@@ -31,7 +32,8 @@ public:
     void highlightErroredLine(int);
     void codeStopped();
 
-    QString getSourceCode() const;
+    QString getVertexSourceCode() const;
+    QString getFragmentSourceCode() const;
     QString getTitle() const;
 
 protected:
@@ -74,14 +76,14 @@ private:
     bool saveFile(const QString &);
     bool saveDialog();
     void saveSettings();
-    void setAsCurrentFile(const QString &);
+    void setAsCurrentFile(const QString &vertexFile, const QString &fragmentFile);
     QString stripName(const QString &);
 
     int templateNum;
-    bool pythonRegular;
 
-    CodeEditor *codeEditor;
-    QString currentFile;
+    QSplitter *codeEditors;
+    CodeEditor *vertexCodeEditor, *fragmentCodeEditor;
+    QString currentVertexFile, currentFragmentFile;
 
     QMenu *fMenu;
     QMenu *eMenu;

@@ -18,7 +18,8 @@ class WindowInstance : public IInstance
 public:
     WindowInstance(int id, const QHash<QString,QVariant> &settings, QObject *parent = 0);
     ~WindowInstance();
-    virtual QString sourceCode() const;
+    virtual QString vertexSourceCode() const;
+    virtual QString fragmentSourceCode() const;
     virtual QString title() const;
     virtual bool close();
     virtual void reportError(const QString &message);

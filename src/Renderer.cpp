@@ -10,32 +10,8 @@ static GLfloat uvs[] = {
     1,1, 0,1, 0,0
 };
 
-const char * Renderer::defaultVertexShader =
-        "#version 330 core\n"
-        "\n"
-        "in vec3 position;\n"
-        "in vec2 texCoord;\n"
-        "\n"
-        "out vec2  uv;\n"
-        "\n"
-        "void main(){\n"
-        "   gl_Position = vec4(position, 1);\n"
-        "   uv = texCoord;\n"
-        "}";
-
-const char * Renderer::defaultFragmentShader =
-        "#version 330 core\n"
-        "\n"
-        "out vec4 color;\n"
-        "\n"
-        "in vec2 uv;\n"
-        "uniform float time;\n"
-        "uniform vec2 mouse;\n"
-        "uniform float ration;\n"
-        "\n"
-        "void main(){\n"
-        "     color = vec4(cos(uv.x * 5 - time / 1000) / 2 + .5, 0, sin(uv.x * 5 - time / 1000) / 2 + .5, 1);\n"
-        "}";
+const QString Renderer::defaultVertexShader = QString(QFile(":/rc/template.vert").readAll());
+const QString Renderer::defaultFragmentShader = QString(QFile(":/rc/template.frag").readAll());
 
 /**
  * @brief Renderer::Renderer
@@ -43,7 +19,7 @@ const char * Renderer::defaultFragmentShader =
  *
  * Create a new Renderer with default shader
  */
-Renderer::Renderer(QWindow *parent) : Renderer::Renderer("new", defaultFragmentShader, parent){ }
+Renderer::Renderer(QWindow *parent) : Renderer::Renderer("new", defaultVertexShader, defaultFragmentShader, parent){ }
 
 /**
  * @brief Renderer::Renderer
@@ -53,20 +29,21 @@ Renderer::Renderer(QWindow *parent) : Renderer::Renderer("new", defaultFragmentS
  *
  * Create a new Renderer with given code and set filename as title
  */
-Renderer::Renderer(const QString &filename, const QString &instructions, QWindow *parent) :
+Renderer::Renderer(const QString &path, const QString &vertexShader, const QString &fragmentShader, QWindow *parent) :
     QWindow(parent),
-    currentFile(filename),
+    currentPath(path),
     clearColor(Qt::black),
     context(0), device(0),
     time(0),
     pendingUpdate(false),
     vao(0), uvBuffer(0), audioLeftTexture(0), audioRightTexture(0),
     vertexAttr(0), uvAttr(0), timeUniform(0),
+    mID(0), mvID(0), mvpID(0),
     shaderProgram(0),
-    fragmentSource(instructions),
+    vertexSource(vertexShader), fragmentSource(fragmentShader),
     textureRegEx("(^|\n|\r)\\s*#texture\\s+([A-Za-z_][A-Za-z0-9_]*)\\s+([^\n\r]+)")
 {
-    setTitle(filename);
+    setTitle(path);
 
     m_logger = new QOpenGLDebugLogger( this );
 
@@ -76,6 +53,9 @@ Renderer::Renderer(const QString &filename, const QString &instructions, QWindow
 
     setSurfaceType(QWindow::OpenGLSurface);
 
+    V.translate(0, 0, -1);
+    P.perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
+    uploadMVP();
 
     time = new QTime();
     time->start();
@@ -123,6 +103,10 @@ Renderer::~Renderer(){
  * Allocates grafic memory and initialize the shader program
  */
 bool Renderer::init(){
+    model.init();
+    if(modelFile != "")
+        model.loadModel(modelFile.toStdString());
+
     delete vao;
     vao = new QOpenGLVertexArrayObject(this);
     vao->create();
@@ -155,7 +139,7 @@ bool Renderer::init(){
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
     glClearColor(0, 0, 0.3, 1);
-    bool result = initShaders(fragmentSource);
+    bool result = initShaders(vertexSource, fragmentSource);
 
     vao->release();
 
@@ -169,9 +153,9 @@ bool Renderer::init(){
  *
  * Initialze and compile the shader program
  */
-bool Renderer::initShaders(QString fragmentShader){
+bool Renderer::initShaders(QString vertexShader, QString fragmentShader){
     QList<QPair<QString, QString>> images;
-	QFileInfo codeFile(currentFile);
+    QFileInfo codeFile(currentPath + ".frag");
 
     int pos = 0;
     while((pos = textureRegEx.indexIn(fragmentShader, pos)) != -1){
@@ -186,10 +170,12 @@ bool Renderer::initShaders(QString fragmentShader){
 
         if(!textureImage.isFile()){
             qDebug() << "Texture image does not exsit: " << imagePath;
-            if(fragmentShader == defaultFragmentShader)
-                qWarning() << tr("Failed to compile default shader.");
-            else if(shaderProgram == 0)
-                initShaders(defaultFragmentShader);
+            if(shaderProgram == 0){
+                if(vertexShader == defaultVertexShader && fragmentShader == defaultFragmentShader)
+                    qWarning() << tr("Failed to compile default shader.");
+                else
+                    initShaders(defaultVertexShader, defaultFragmentShader);
+            }
             Q_EMIT errored("Image file does not exist: " + imagePath, fragmentShader.mid(0, pos).count('\n'));
             return false;
         }
@@ -204,33 +190,21 @@ bool Renderer::initShaders(QString fragmentShader){
 	
     QOpenGLShaderProgram *newShaderProgram = new QOpenGLShaderProgram(this);
     bool hasError = false;
-    QString error = "";
 	
-    if(!hasError && !newShaderProgram->addShaderFromSourceCode(QOpenGLShader::Vertex, defaultVertexShader)){
+    if(!hasError && !newShaderProgram->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShader)){
         hasError = true;
-        error = newShaderProgram->log();
+    }
 
-        qWarning() << tr("Failed to compile default vertex shader.");
-	}
     if(!hasError && !newShaderProgram->addShaderFromSourceCode(QOpenGLShader::Fragment,fragmentShader)){
         hasError = true;
-        error = newShaderProgram->log();
-		
-        if(fragmentShader == defaultFragmentShader)
-            qWarning() << tr("Failed to compile default shader.");
-        else if(shaderProgram == 0)
-            initShaders(defaultFragmentShader);
     }
+
     if(!hasError && !newShaderProgram->link()){
         hasError = true;
-        error = newShaderProgram->log();
-		
-        if(fragmentShader == defaultFragmentShader)
-            qWarning() << tr("Failed to compile default shader.");
-        else if(shaderProgram == 0)
-            initShaders(defaultFragmentShader);
     }
+
     if(hasError){
+        QString error = newShaderProgram->log();
         delete newShaderProgram;
 
         //mac  :<line>:
@@ -243,6 +217,13 @@ bool Renderer::initShaders(QString fragmentShader){
             else
                 Q_EMIT errored(error, text.toInt());
         }
+
+        if(shaderProgram == 0 && (vertexShader != defaultFragmentShader || fragmentShader != defaultFragmentShader)){
+            initShaders(defaultVertexShader, defaultFragmentShader);
+        } else {
+            qWarning() << tr("Failed to compile default shader.");
+        }
+
         return false;
     }
 
@@ -273,18 +254,24 @@ bool Renderer::initShaders(QString fragmentShader){
         shaderProgram = newShaderProgram;
         shaderProgram->bind();
 
-        vertexAttr   = shaderProgram->attributeLocation("position");
+        vertexAttr = shaderProgram->attributeLocation("position");
         glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
         shaderProgram->setAttributeBuffer(vertexAttr, GL_FLOAT, 0, 3);
         shaderProgram->enableAttributeArray(vertexAttr);
 
-        uvAttr       = shaderProgram->attributeLocation("texCoord");
+        uvAttr = shaderProgram->attributeLocation("texCoord");
         glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
         shaderProgram->setAttributeBuffer("texCoord", GL_FLOAT, 0, 2);
         shaderProgram->enableAttributeArray(uvAttr);
 
-        timeUniform   = shaderProgram->uniformLocation("time");
-        mouseUniform  = shaderProgram->uniformLocation("mouse");
+        vID = shaderProgram->uniformLocation("V");
+        pID = shaderProgram->uniformLocation("P");
+        mID = shaderProgram->uniformLocation("M");
+        mvID = shaderProgram->uniformLocation("MV");
+        mvpID = shaderProgram->uniformLocation("MVP");
+
+        timeUniform = shaderProgram->uniformLocation("time");
+        mouseUniform = shaderProgram->uniformLocation("mouse");
         rationUniform = shaderProgram->uniformLocation("ration");
 
         shaderProgram->setUniformValue("audioLeft", GLint(0));
@@ -293,6 +280,7 @@ bool Renderer::initShaders(QString fragmentShader){
         for(int i = 0; i < end; ++i)
             shaderProgram->setUniformValue(images[i].first.toLocal8Bit().data(), GLint(i + 2));
 
+        vertexSource = vertexShader;
         fragmentSource = fragmentShader;
     shaderProgramMutex.unlock();
 
@@ -300,6 +288,9 @@ bool Renderer::initShaders(QString fragmentShader){
 //    qDebug() << "uvAttr" << uvAttr;
 //    qDebug() << "timeUniform" << timeUniform;
 //    qDebug() << "audioUniform" << audioUniform;
+
+    uploadMVP();
+
     return true;
 }
 
@@ -337,15 +328,6 @@ void Renderer::render(){
 // TODO: Light source
 // TODO: compile users vertex shader
 
-//        QMatrix4x4
-//            M,
-//            MV  = V * M,
-//            MVP = P * MV;
-//        glUniformMatrix4fv(_data->M,   1, GL_FALSE, &M  [0][0]);
-//        glUniformMatrix4fv(_data->MV,  1, GL_FALSE, &MV [0][0]);
-//        glUniformMatrix4fv(_data->MVP, 1, GL_FALSE, &MVP[0][0]);
-//        model.draw();
-
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_1D, audioLeftTexture);
@@ -362,9 +344,18 @@ void Renderer::render(){
         shaderProgram->setUniformValue(rationUniform, ration);
         shaderProgram->setUniformValue(timeUniform, GLfloat(time->elapsed()));
 
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+//        glDrawArrays(GL_TRIANGLES, 0, 6);
+        QMatrix4x4
+                MV  = V * M,
+                MVP = P * MV;
+
+        glUniformMatrix4fv(mID,   1, GL_FALSE, M.data());
+        glUniformMatrix4fv(mvID,  1, GL_FALSE, MV.data());
+        glUniformMatrix4fv(mvpID, 1, GL_FALSE, MVP.data());
+        model.draw();
 
         vao->release();
+        shaderProgram->release();
     shaderProgramMutex.unlock();
 }
 
@@ -414,7 +405,7 @@ void Renderer::renderNow(){
 
 
     if(!shaderProgram)
-        initShaders(fragmentSource);
+        initShaders(vertexSource, fragmentSource);
 
     if(shaderProgram)
         render();
@@ -464,11 +455,11 @@ void Renderer::exposeEvent(QExposeEvent *){
  *
  * Set new title and compile new code for the shader program
  */
-bool Renderer::updateCode(const QString &filename, const QString &code){
-    if(!initShaders(code))
+bool Renderer::updateCode(const QString &path, const QString &vertCode, const QString &fragCode){
+    if(!initShaders(vertCode, fragCode))
         return false;
-    currentFile = filename;
-    setTitle(filename);
+    currentPath = path;
+    setTitle(path);
     show();
     return true;
 }
@@ -575,15 +566,47 @@ void Renderer::onMessageLogged(QOpenGLDebugMessage message){
  * @param rotation Model rotation in 3D-Space
  * @return True on success, otherwise false.
  */
-bool Renderer::loadModel(const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation)
-{
-qDebug() << "load object:" << file << offset << scaling << rotation;
-    if(!model.loadModel(file.toStdString(), true))
-        return false;
+bool Renderer::loadModel(const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation){
+    if(file == modelFile)
+        return true;
+
+    if(context && context->isValid()){
+        shaderProgramMutex.lock();
+        shaderProgram->bind();
+        bool ok = model.loadModel(file.toStdString(), false);
+        shaderProgram->release();
+        shaderProgramMutex.unlock();
+
+        if(!ok)
+            return false;
+    }
 
     modelFile = file;
     modelOffset = offset;
     modelScaling = scaling;
     modelRotation = rotation;
+
+    M = QMatrix4x4();
+    M.rotate(rotation.x(), QVector3D(1, 0, 0));
+    M.rotate(rotation.y(), QVector3D(0, 1, 0));
+    M.rotate(rotation.z(), QVector3D(0, 0, 1));
+    M.scale(scaling);
+    M.translate(offset);
+    uploadMVP();
+
     return true;
+}
+
+void Renderer::uploadMVP(){
+    if(shaderProgram){
+        this->MV = V * M;
+        this->MVP = P * this->MV;
+        shaderProgramMutex.lock();
+        glUniformMatrix4fv(pID, 1, false, P.data());
+        glUniformMatrix4fv(vID, 1, false, V.data());
+        glUniformMatrix4fv(mID, 1, false, M.data());
+        glUniformMatrix4fv(mvID, 1, false, MV.data());
+        glUniformMatrix4fv(mvpID, 1, false, MVP.data());
+        shaderProgramMutex.unlock();
+    }
 }

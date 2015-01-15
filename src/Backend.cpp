@@ -307,7 +307,7 @@ void Backend::instanceRunCode(IInstance *instance)
 {
     long id = instance->ID;
     if(threads.contains(id)){
-        bool worked = threads[id]->updateCode(instance->title(), instance->sourceCode());
+        bool worked = threads[id]->updateCode(instance->title(), instance->vertexSourceCode(), instance->fragmentSourceCode());
         if(!worked){
             // Dont't stop!
 //            instances[id]->codeStopped();
@@ -421,7 +421,7 @@ void Backend::runGlFile(IInstance *instance){
             this, SLOT(getExecutionResults(GlLiveThread*, QString)));
     connect(thread, SIGNAL(errorSignal(GlLiveThread*, QString, int)),
             this, SLOT(getError(GlLiveThread*, QString, int)));
-    thread->initialize(instance->title(), instance->sourceCode());
+    thread->initialize(instance->title(), instance->vertexSourceCode(), instance->fragmentSourceCode());
     thread->start();
     threads.insert(thread->ID, thread);
 }

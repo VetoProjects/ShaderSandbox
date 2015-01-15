@@ -16,8 +16,8 @@ class LiveThread : public QThread{
 public:
     LiveThread(const long identity, QObject* parent = 0): QThread(parent), ID(identity){}
     virtual void run() = 0;
-    virtual void initialize(const QString &title, const QString &instructions) = 0;
-    virtual bool updateCode(const QString &title, const QString &instructions) = 0;
+    virtual void initialize(const QString &title, const QString &vertexShader, const QString &fragmentShader) = 0;
+    virtual bool updateCode(const QString &title, const QString &vertexShader, const QString &fragmentShader) = 0;
     virtual bool loadModel(const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation) = 0;
     const long ID;
 private:
@@ -40,8 +40,8 @@ public:
             runObj->show();
     }
     // No parent object =(
-    void initialize(const QString &title, const QString &instructions){
-        runObj = new Renderer(title, instructions);
+    void initialize(const QString &title, const QString &vertexShader, const QString &fragmentShader){
+        runObj = new Renderer(title, vertexShader, fragmentShader);
         connect(runObj, SIGNAL(doneSignal(QString)), this, SLOT(doneSignalReceived(QString)));
         connect(runObj, SIGNAL(errored(QString,int)), this, SLOT(erroredReceived(QString, int)));
 
@@ -49,9 +49,9 @@ public:
         runObj->show();
 
     }
-    bool updateCode(const QString &filename, const QString &code){
+    bool updateCode(const QString &filename, const QString &vertexShader, const QString &fragmentShader){
         if(runObj)
-            return runObj->updateCode(filename, code);
+            return runObj->updateCode(filename, vertexShader, fragmentShader);
         return false;
     }
     bool loadModel(const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation){

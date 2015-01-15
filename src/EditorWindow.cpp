@@ -11,15 +11,22 @@
  * Also, it deals with platform-specific displaying quirks.
  */
 EditorWindow::EditorWindow(const QHash<QString, QVariant> &settings, QWidget *parent) : QMainWindow(parent){
-    codeEditor = new CodeEditor(this);
-    setCentralWidget(codeEditor);
+    vertexCodeEditor = new CodeEditor(this);
+    fragmentCodeEditor = new CodeEditor(this);
+
+    codeEditors = new QSplitter(Qt::Horizontal, this);
+    codeEditors->addWidget(vertexCodeEditor);
+    codeEditors->addWidget(fragmentCodeEditor);
+
+    setCentralWidget(codeEditors);
 
     addActions();
     addMenus();
     addToolBars();
     addStatusBar();
 
-    connect(codeEditor->document(), SIGNAL(contentsChanged()), this, SLOT(docModified()));
+    connect(vertexCodeEditor->document(), SIGNAL(contentsChanged()), this, SLOT(docModified()));
+    connect(fragmentCodeEditor->document(), SIGNAL(contentsChanged()), this, SLOT(docModified()));
 
     applySettings(settings);
 
@@ -40,7 +47,8 @@ EditorWindow::EditorWindow(const QHash<QString, QVariant> &settings, QWidget *pa
  * Deletes all the GUI elements.
  */
 EditorWindow::~EditorWindow(){
-    delete codeEditor;
+    delete vertexCodeEditor;
+    delete fragmentCodeEditor;
     delete newAction;
     delete openAction;
     delete saveAction;
@@ -89,9 +97,10 @@ void EditorWindow::gotCloseAll()
  */
 void EditorWindow::newFile(){
     if(saveDialog()){
-        codeEditor->clear();
-        setAsCurrentFile("");
-        loadFile(":/rc/template.glsl");
+        vertexCodeEditor->clear();
+        fragmentCodeEditor->clear();
+        setAsCurrentFile("", "");
+        loadFile(":/rc/template.vert");
     }
 }
 
@@ -120,11 +129,13 @@ void EditorWindow::openFile(){
  * a name to the current file)(SLOT).
  */
 bool EditorWindow::saveFile(){
-   if(currentFile.isEmpty()){
+    // TODO: what should we do?
+/*   if(currentFile.isEmpty()){
         return saveFileAs();
     }else{
         return saveFile(currentFile);
-    }
+    } */
+    return true;
 }
 
 /**
@@ -150,10 +161,17 @@ void EditorWindow::saveSettings(){
     QHash<QString, QVariant> settings;
     settings.insert("pos", this->pos());
     settings.insert("size", this->size());
-    if(!currentFile.contains("template."))
-        settings.insert("file", currentFile);
+
+    if(!currentVertexFile.contains("template."))
+        settings.insert("vertexFile", currentVertexFile);
     else
-        settings.insert("file", "");
+        settings.remove("vertextFile");
+
+    if(!currentFragmentFile.contains("template."))
+        settings.insert("fragmentFile", currentFragmentFile);
+    else
+        settings.remove("fragmentFile");
+
     Q_EMIT changedSettings(this, settings);
 }
 
@@ -174,7 +192,7 @@ void EditorWindow::gotOpenSettings(){
  * the little * at the top of the window beside the name).
  */
 void EditorWindow::docModified(){
-    setWindowModified(codeEditor->document()->isModified());
+    setWindowModified(vertexCodeEditor->document()->isModified() || fragmentCodeEditor->document()->isModified());
 }
 
 /**
@@ -205,7 +223,8 @@ void EditorWindow::codeStopped()
  * that line.
  */
 void EditorWindow::highlightErroredLine(int lineno){
-    codeEditor->highlightErroredLine(lineno);
+    vertexCodeEditor->highlightErroredLine(lineno);
+    // TODO: filter fragment-shader-errors
 }
 
 /**
@@ -221,12 +240,10 @@ void EditorWindow::applySettings(const QHash<QString, QVariant> &settings){
         move(pos);
         resize(size);
     }
-    const QString file = settings.value("file", "").toString();
-    if(file.isEmpty()){
-        loadFile(":/rc/template.glsl");
-        setAsCurrentFile("");
-    } else
-        loadFile(file);
+    const QString vertexFile = settings.value("vertexFile", ":/rc/template.vert").toString();
+    const QString fragmentFile = settings.value("fragmentFile", ":/rc/template.frag").toString();
+    loadFile(vertexFile);
+    loadFile(fragmentFile);
 }
 
 /**
@@ -257,8 +274,13 @@ void EditorWindow::showResults(const QString &returnedValue){
  *
  * returns code in editor.
  */
-QString EditorWindow::getSourceCode() const{
-    return codeEditor->toPlainText();
+QString EditorWindow::getVertexSourceCode() const{
+    return vertexCodeEditor->toPlainText();
+}
+
+QString EditorWindow::getFragmentSourceCode() const
+{
+    return fragmentCodeEditor->toPlainText();
 }
 
 /**
@@ -268,7 +290,7 @@ QString EditorWindow::getSourceCode() const{
  * returns current file name.
  */
 QString EditorWindow::getTitle() const{
-    return currentFile;
+    return currentVertexFile + " | " + currentFragmentFile;
 }
 
 /**
@@ -379,7 +401,7 @@ void EditorWindow::addStatusBar(){
  * Invoked when he exits the application/the current file unchanged.
  */
 bool EditorWindow::saveDialog(){
-    if(codeEditor->document()->isModified()){
+    if(vertexCodeEditor->document()->isModified() || fragmentCodeEditor->document()->isModified()){
         QMessageBox::StandardButton question;
         question = QMessageBox::warning(this, tr("VeToLC"),
                                 tr("The document has been modified"
@@ -402,13 +424,22 @@ bool EditorWindow::saveDialog(){
  * loads a file of a given name
  */
 void EditorWindow::loadFile(const QString &path){
+    QFileInfo fileInfo(path);
+    QString suffix = fileInfo.suffix().toLower();
+    bool vertexFile = (suffix == "vert" || suffix == "vertex" || suffix == "vertexshader");
+    bool fragmentFile = (suffix == "frag" || suffix == "fragment" || suffix == "fragmentshader");
+
+    if(!vertexFile && !fragmentFile){
+        QString msg = tr("File must be suffixed with vert, vertex, vertexshader, frag, fragment or fragmentshader.");
+        QMessageBox::warning(this, tr("ShaderSandbox"), msg);
+        return;
+    }
+
     QFile file(path);
     //display an error message if the file cannot be opened and why
     if(!file.open(QFile::ReadOnly | QFile::Text)){
-        QMessageBox::warning(this, tr("VeToLC"),
-                             tr("Cannot read file %1:\n%2.")
-                              .arg(path)
-                              .arg(file.errorString()));
+        QString msg = tr("Cannot read file %1:\n%2.").arg(path).arg(file.errorString());
+        QMessageBox::warning(this, tr("ShaderSandbox"), msg);
         return;
     }
 
@@ -417,18 +448,27 @@ void EditorWindow::loadFile(const QString &path){
      * set a waiting cursor. Real fancy, huh?
      */
     QTextStream in(&file);
-#ifdef QT_NO_CURSOR
-    codeEditor->setPlainText(in.readAll());
-#else
+#ifndef QT_NO_CURSOR
     QApplication::setOverrideCursor(Qt::WaitCursor);
-    codeEditor->setPlainText(in.readAll());
+#endif
+
+    if(vertexFile){
+        vertexCodeEditor->setPlainText(in.readAll());
+        setAsCurrentFile(path, currentVertexFile);
+        Q_EMIT changedSetting(this, "vertexFile", path);
+    }
+    if(fragmentFile){
+        fragmentCodeEditor->setPlainText(in.readAll());
+        setAsCurrentFile(currentVertexFile, path);
+        Q_EMIT changedSetting(this, "fragmentFile", path);
+    }
+
+#ifndef QT_NO_CURSOR
     QApplication::restoreOverrideCursor();
 #endif
 
     //set current file and display a message in the status bar
-    setAsCurrentFile(path);
     statusBar()->showMessage(tr("File was loaded"), 2000);
-    Q_EMIT changedSetting(this, "file", path);
 }
 
 /**
@@ -440,12 +480,12 @@ void EditorWindow::loadFile(const QString &path){
  * saves the current file under a provided name
  */
 bool EditorWindow::saveFile(const QString &name){
+    // TODO: how !? =/
+
     QFile file(name);
     //display an error message if the file cannot be saved and why
     if(!file.open(QFile::WriteOnly | QFile::Text)){
-        warningDisplay(tr("Cannot write file %1:\n%2.")
-                           .arg(name)
-                           .arg(file.errorString()));
+        warningDisplay(tr("Cannot write file %1:\n%2.").arg(name).arg(file.errorString()));
         return false;
     }
 
@@ -454,16 +494,19 @@ bool EditorWindow::saveFile(const QString &name){
      * set a waiting cursor. Real fancy, huh?
      */
     QTextStream out(&file);
-#ifdef QT_NO_CURSOR
-    out << codeEditor->toPlainText();
-#else
+#ifndef QT_NO_CURSOR
     QApplication::setOverrideCursor(Qt::WaitCursor);
-    out << codeEditor->toPlainText();
+#endif
+
+    out << vertexCodeEditor->toPlainText();
+
+#ifndef QT_NO_CURSOR
     QApplication::restoreOverrideCursor();
 #endif
 
     //set current file and display a message in the status bar
-    setAsCurrentFile(name);
+    // TODO: which file?
+//    setAsCurrentFile(name);
     statusBar()->showMessage(tr("File saved"), 2000);
     return true;
 }
@@ -475,17 +518,21 @@ bool EditorWindow::saveFile(const QString &name){
  *
  * sets the file name and displays it at the top of the window
  */
-void EditorWindow::setAsCurrentFile(const QString &name){
-    currentFile = name;
-    codeEditor->document()->setModified(false);
+void EditorWindow::setAsCurrentFile(const QString &vertexFile, const QString &fragmentFile){
+    currentVertexFile = vertexFile;
+    currentFragmentFile = fragmentFile;
+
+    vertexCodeEditor->document()->setModified(false);
+    fragmentCodeEditor->document()->setModified(false);
 
     setWindowModified(false);
 
-    setWindowFilePath(currentFile);
-    if(currentFile != "" && !currentFile.contains("template."))
-        setWindowTitle("VeToLC | " + stripName(currentFile) + "[*]");
+    // TODO: user fragmentFile as well
+    setWindowFilePath(vertexFile);
+    if(vertexFile != "" && !vertexFile.contains("template."))
+        setWindowTitle("ShaderSandbox | " + stripName(vertexFile) + "[*]");
     else
-        setWindowTitle("VeToLC [*]");
+        setWindowTitle("ShaderSandbox [*]");
 }
 
 /**

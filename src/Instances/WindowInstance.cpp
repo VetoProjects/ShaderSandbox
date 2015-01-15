@@ -47,9 +47,14 @@ WindowInstance::~WindowInstance()
  *
  * Gets the Editor Content as a QString.
  */
-QString WindowInstance::sourceCode() const
+QString WindowInstance::vertexSourceCode() const
 {
-    return window->getSourceCode();
+    return window->getVertexSourceCode();
+}
+
+QString WindowInstance::fragmentSourceCode() const
+{
+    return window->getFragmentSourceCode();
 }
 
 /**
@@ -242,6 +247,8 @@ void WindowInstance::createWindow(const QHash<QString,QVariant> &settings)
 bool WindowInstance::showObjectLoaderDialog()
 {
     objectLoaderDialog->show();
+    // TODO: return value?
+    return true;
 }
 
 void WindowInstance::emitLoadModel()
