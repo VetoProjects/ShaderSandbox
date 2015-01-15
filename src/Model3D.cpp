@@ -244,7 +244,7 @@ void Model3D::draw(){
             GL_UNSIGNED_INT,	// Type
             (void*)0			// Element array buffer offset
         );
-    }else{
+    } else {
         glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
         glDrawArrays(GL_TRIANGLES, 0, vertexCount);
     }
@@ -252,7 +252,6 @@ void Model3D::draw(){
     glDisableVertexAttribArray(0);
     if(uvBuffer     > 0) glDisableVertexAttribArray(1);
     if(normalBuffer > 0) glDisableVertexAttribArray(2);
-    // if(colorBuffer  > 0) glDisableVertexAttribArray(3);
 
     vao->release();
 }

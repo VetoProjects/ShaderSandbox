@@ -402,7 +402,6 @@ void Backend::instanceRequestSettings(IInstance *instance, QHash<QString, QVaria
  */
 void Backend::instanceLoadModel(IInstance *instance, const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation)
 {
-    qDebug() << "Backend";
     if(threads.contains(instance->ID))
         threads[instance->ID]->loadModel(file, offset, scaling, rotation);
 }

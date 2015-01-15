@@ -101,6 +101,7 @@ void EditorWindow::newFile(){
         fragmentCodeEditor->clear();
         setAsCurrentFile("", "");
         loadFile(":/rc/template.vert");
+        loadFile(":/rc/template.frag");
     }
 }
 

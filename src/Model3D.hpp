@@ -8,6 +8,8 @@
 #include <QVector2D>
 #include <QVector3D>
 
+#include <QDebug>
+
 class Model3D : protected QOpenGLFunctions{
 public:
     Model3D();

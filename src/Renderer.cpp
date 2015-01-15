@@ -53,9 +53,8 @@ Renderer::Renderer(const QString &path, const QString &vertexShader, const QStri
 
     setSurfaceType(QWindow::OpenGLSurface);
 
-    V.translate(0, 0, -1);
+    V.lookAt(QVector3D(0, 1, 2), QVector3D(0, 0, 0), QVector3D(0, 1, 0));
     P.perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
-    uploadMVP();
 
     time = new QTime();
     time->start();
@@ -103,6 +102,12 @@ Renderer::~Renderer(){
  * Allocates grafic memory and initialize the shader program
  */
 bool Renderer::init(){
+    glClearColor(0, 0, 0.3, 1);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_TEXTURE_1D);
+    glEnable(GL_TEXTURE_2D);
+
     model.init();
     if(modelFile != "")
         model.loadModel(modelFile.toStdString());
@@ -122,15 +127,11 @@ bool Renderer::init(){
     glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(uvs), uvs, GL_STATIC_DRAW);
 
-    glEnable(GL_TEXTURE_1D);
-    glEnable(GL_TEXTURE_2D);
-
     glDeleteTextures(1, &audioLeftTexture);
     glGenTextures(1, &audioLeftTexture);
     glBindTexture(GL_TEXTURE_1D, audioLeftTexture);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
 
     glDeleteTextures(1, &audioRightTexture);
     glGenTextures(1, &audioRightTexture);
@@ -138,7 +139,6 @@ bool Renderer::init(){
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-    glClearColor(0, 0, 0.3, 1);
     bool result = initShaders(vertexSource, fragmentSource);
 
     vao->release();
@@ -289,7 +289,7 @@ bool Renderer::initShaders(QString vertexShader, QString fragmentShader){
 //    qDebug() << "timeUniform" << timeUniform;
 //    qDebug() << "audioUniform" << audioUniform;
 
-    uploadMVP();
+//    uploadMVP();
 
     return true;
 }
@@ -320,13 +320,14 @@ void Renderer::render(){
                             (float)mouse.y() / (float)this->height());
     float ration = ((this->height() == 0) ? 1 : (float)this->width() / (float)this->height());
 
+
     shaderProgramMutex.lock();
         shaderProgram->bind();
         vao->bind();
+        uploadMVP(); // attention: uncomment mutex => deadlock
 
 // TODO: Find good start M, V and P (M from dialog, V and P by mouse / keyboard control?)
 // TODO: Light source
-// TODO: compile users vertex shader
 
 
         glActiveTexture(GL_TEXTURE0);
@@ -336,7 +337,7 @@ void Renderer::render(){
         glBindTexture(GL_TEXTURE_1D, audioRightTexture);
 
         for(int i = 0; i < textures.length(); ++i){
-            glActiveTexture(GL_TEXTURE0 + 2 + i);
+            glActiveTexture(GL_TEXTURE2 + i);
             textures[i]->bind();
         }
 
@@ -345,13 +346,16 @@ void Renderer::render(){
         shaderProgram->setUniformValue(timeUniform, GLfloat(time->elapsed()));
 
 //        glDrawArrays(GL_TRIANGLES, 0, 6);
-        QMatrix4x4
-                MV  = V * M,
-                MVP = P * MV;
+//        MV  = V * M,
+//        MVP = P * MV;
 
-        glUniformMatrix4fv(mID,   1, GL_FALSE, M.data());
-        glUniformMatrix4fv(mvID,  1, GL_FALSE, MV.data());
-        glUniformMatrix4fv(mvpID, 1, GL_FALSE, MVP.data());
+//        glUniformMatrix4fv(pID,   1, GL_FALSE, P.data());
+//        glUniformMatrix4fv(vID,   1, GL_FALSE, V.data());
+//        glUniformMatrix4fv(mID,   1, GL_FALSE, M.data());
+//        glUniformMatrix4fv(mvID,  1, GL_FALSE, MV.data());
+//        glUniformMatrix4fv(mvpID, 1, GL_FALSE, MVP.data());
+
+
         model.draw();
 
         vao->release();
@@ -382,21 +386,16 @@ void Renderer::renderNow(){
     if(!isExposed())
         return;
 
-    bool needsInit = false;
-
-    if(!context){
+    if(context)
+        context->makeCurrent(this);
+    else {
         context = new QOpenGLContext(this);
         context->setFormat(requestedFormat());
         context->create();
+        context->makeCurrent(this);
 
-        needsInit = true;
-    }
-
-    context->makeCurrent(this);
-
-    if(needsInit){
         if (m_logger->initialize()){
-            m_logger->startLogging( QOpenGLDebugLogger::SynchronousLogging );
+            m_logger->startLogging(QOpenGLDebugLogger::SynchronousLogging);
             m_logger->enableMessages();
         }
         initializeOpenGLFunctions();
@@ -532,15 +531,15 @@ void Renderer::updateAudioData(QByteArray data){
 
 
     shaderProgramMutex.lock();
-    shaderProgram->bind();
+        shaderProgram->bind();
 
-    glBindTexture(GL_TEXTURE_1D, audioLeftTexture);
-    glTexImage1D(GL_TEXTURE_1D, 0, GL_R32F, count / typeSize, 0, GL_RED, type, left);
+        glBindTexture(GL_TEXTURE_1D, audioLeftTexture);
+        glTexImage1D(GL_TEXTURE_1D, 0, GL_R32F, count / typeSize, 0, GL_RED, type, left);
 
-    glBindTexture(GL_TEXTURE_1D, audioRightTexture);
-    glTexImage1D(GL_TEXTURE_1D, 0, GL_R32F, count / typeSize, 0, GL_RED, type, right);
+        glBindTexture(GL_TEXTURE_1D, audioRightTexture);
+        glTexImage1D(GL_TEXTURE_1D, 0, GL_R32F, count / typeSize, 0, GL_RED, type, right);
 
-    shaderProgram->release();
+        shaderProgram->release();
     shaderProgramMutex.unlock();
     if(left != data.data())
         delete[] left;
@@ -572,9 +571,9 @@ bool Renderer::loadModel(const QString &file, const QVector3D &offset, const QVe
 
     if(context && context->isValid()){
         shaderProgramMutex.lock();
-        shaderProgram->bind();
-        bool ok = model.loadModel(file.toStdString(), false);
-        shaderProgram->release();
+            shaderProgram->bind();
+            bool ok = model.loadModel(file.toStdString(), false);
+            shaderProgram->release();
         shaderProgramMutex.unlock();
 
         if(!ok)
@@ -592,21 +591,25 @@ bool Renderer::loadModel(const QString &file, const QVector3D &offset, const QVe
     M.rotate(rotation.z(), QVector3D(0, 0, 1));
     M.scale(scaling);
     M.translate(offset);
-    uploadMVP();
+//    uploadMVP();
 
     return true;
 }
 
 void Renderer::uploadMVP(){
-    if(shaderProgram){
-        this->MV = V * M;
-        this->MVP = P * this->MV;
-        shaderProgramMutex.lock();
-        glUniformMatrix4fv(pID, 1, false, P.data());
-        glUniformMatrix4fv(vID, 1, false, V.data());
-        glUniformMatrix4fv(mID, 1, false, M.data());
-        glUniformMatrix4fv(mvID, 1, false, MV.data());
-        glUniformMatrix4fv(mvpID, 1, false, MVP.data());
-        shaderProgramMutex.unlock();
-    }
+//    if(shaderProgram){
+        MV = V * M;
+        MVP = P * MV;
+//        shaderProgramMutex.lock();
+//            shaderProgram->bind();
+//            vao->bind();
+            glUniformMatrix4fv(pID, 1, GL_FALSE, P.data());
+            glUniformMatrix4fv(vID, 1, GL_FALSE, V.data());
+            glUniformMatrix4fv(mID, 1, GL_FALSE, M.data());
+            glUniformMatrix4fv(mvID, 1, GL_FALSE, MV.data());
+            glUniformMatrix4fv(mvpID, 1, GL_FALSE, MVP.data());
+//            vao->release();
+//            shaderProgram->release();
+//        shaderProgramMutex.unlock();
+//    }
 }
