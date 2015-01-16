@@ -105,6 +105,7 @@ bool Renderer::init(){
     glClearColor(0, 0, 0.3, 1);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
+    glFrontFace(GL_CW);
     glEnable(GL_TEXTURE_1D);
     glEnable(GL_TEXTURE_2D);
 
@@ -566,10 +567,10 @@ void Renderer::onMessageLogged(QOpenGLDebugMessage message){
  * @return True on success, otherwise false.
  */
 bool Renderer::loadModel(const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation){
-    if(file == modelFile)
-        return true;
+//    if(file == modelFile)
+//        return true;
 
-    if(context && context->isValid()){
+    if(file != modelFile &&  context && context->isValid()){
         shaderProgramMutex.lock();
             shaderProgram->bind();
             bool ok = model.loadModel(file.toStdString(), false);

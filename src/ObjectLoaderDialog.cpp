@@ -133,6 +133,20 @@ QVBoxLayout* ObjectLoaderDialog::setupLoaderLayout(){
     return mainLayout;
 }
 
+void ObjectLoaderDialog::setData(const QString &modelFile, const QVector3D &modelOffset,
+                                 const QVector3D &modelScaling, const QVector3D &modelRotation){
+    fileNameBox->setText(modelFile);
+    offsetBoxX->setValue(modelOffset.x());
+    offsetBoxY->setValue(modelOffset.y());
+    offsetBoxZ->setValue(modelOffset.z());
+    scalingBoxX->setValue(modelScaling.x());
+    scalingBoxY->setValue(modelScaling.y());
+    scalingBoxZ->setValue(modelScaling.z());
+    rotationBoxX->setValue(modelRotation.x());
+    rotationBoxY->setValue(modelRotation.y());
+    rotationBoxZ->setValue(modelRotation.z());
+}
+
 void ObjectLoaderDialog::load(){
     QString objectFile = fileNameBox->text();
     if(objectFile.isEmpty()){

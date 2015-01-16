@@ -52,7 +52,6 @@ private Q_SLOTS:
     void gotOpenHelp();
     void gotOpenSettings();
     void gotCloseAll();
-    bool showObjectLoaderDialog();
 
 Q_SIGNALS:
     void closing(EditorWindow *);

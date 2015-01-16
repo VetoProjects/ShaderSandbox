@@ -11,19 +11,6 @@
  * Also, it deals with platform-specific displaying quirks.
  */
 EditorWindow::EditorWindow(const QHash<QString, QVariant> &settings, QWidget *parent) : QMainWindow(parent){
-    objectLoaderDialog = new ObjectLoaderDialog();
-
-    connect(objectLoaderDialog, &ObjectLoaderDialog::objectInfo,
-        [this](const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation) {
-            this->modelFile = file;
-            this->modelOffset = offset;
-            this->modelScaling = scaling;
-            this->modelRotation = rotation;
-            Q_EMIT loadModel(file, offset, scaling, rotation);
-        }
-    );
-
-    showObjectLoaderDialog();
     vertexCodeEditor = new CodeEditor(this);
     fragmentCodeEditor = new CodeEditor(this);
 
@@ -32,6 +19,18 @@ EditorWindow::EditorWindow(const QHash<QString, QVariant> &settings, QWidget *pa
     codeEditors->addWidget(fragmentCodeEditor);
 
     setCentralWidget(codeEditors);
+
+    objectLoaderDialog = new ObjectLoaderDialog();
+    connect(objectLoaderDialog, &ObjectLoaderDialog::objectInfo,
+        [this](const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation) {
+            this->modelFile = file;
+            this->modelOffset = offset;
+            this->modelScaling = scaling;
+            this->modelRotation = rotation;
+            this->saveSettings();
+            Q_EMIT loadModel(file, offset, scaling, rotation);
+        }
+    );
 
     addActions();
     addMenus();
@@ -103,13 +102,6 @@ void EditorWindow::gotOpenHelp()
 void EditorWindow::gotCloseAll()
 {
     Q_EMIT closeAll(this);
-}
-
-bool EditorWindow::showObjectLoaderDialog()
-{
-    objectLoaderDialog->show();
-    // TODO: return value?
-    return true;
 }
 
 /**
@@ -185,15 +177,19 @@ void EditorWindow::saveSettings(){
     settings.insert("pos", this->pos());
     settings.insert("size", this->size());
 
-    if(!currentVertexFile.contains("template."))
-        settings.insert("vertexFile", currentVertexFile);
-    else
-        settings.remove("vertextFile");
+    settings.insert("vertexFile", currentVertexFile);
+    settings.insert("fragmentFile", currentFragmentFile);
 
-    if(!currentFragmentFile.contains("template."))
-        settings.insert("fragmentFile", currentFragmentFile);
-    else
-        settings.remove("fragmentFile");
+    settings.insert("modelFile", modelFile);
+    settings.insert("modelOffsetX", modelOffset.x());
+    settings.insert("modelOffsetY", modelOffset.y());
+    settings.insert("modelOffsetZ", modelOffset.z());
+    settings.insert("modelScalingX", modelScaling.x());
+    settings.insert("modelScalingY", modelScaling.y());
+    settings.insert("modelScalingZ", modelScaling.z());
+    settings.insert("modelRotationX", modelRotation.x());
+    settings.insert("modelRotationY", modelRotation.y());
+    settings.insert("modelRotationZ", modelRotation.z());
 
     Q_EMIT changedSettings(this, settings);
 }
@@ -263,6 +259,18 @@ void EditorWindow::applySettings(const QHash<QString, QVariant> &settings){
         move(pos);
         resize(size);
     }
+    modelFile = settings.value("modelFile", "").toString();
+    modelOffset.setX(settings.value("modelOffsetX", 0).toFloat());
+    modelOffset.setY(settings.value("modelOffsetY", 0).toFloat());
+    modelOffset.setZ(settings.value("modelOffsetZ", 0).toFloat());
+    modelScaling.setX(settings.value("modelScalingX", 1).toFloat());
+    modelScaling.setY(settings.value("modelScalingY", 1).toFloat());
+    modelScaling.setZ(settings.value("modelScalingZ", 1).toFloat());
+    modelRotation.setX(settings.value("modelRotationX", 0).toFloat());
+    modelRotation.setY(settings.value("modelRotationY", 0).toFloat());
+    modelRotation.setZ(settings.value("modelRotationZ", 0).toFloat());
+    objectLoaderDialog->setData(modelFile, modelOffset, modelScaling, modelRotation);
+
     const QString vertexFile = settings.value("vertexFile", ":/rc/template.vert").toString();
     const QString fragmentFile = settings.value("fragmentFile", ":/rc/template.frag").toString();
     loadFile(vertexFile);

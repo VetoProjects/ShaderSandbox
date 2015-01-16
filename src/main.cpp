@@ -44,11 +44,6 @@ int main(int argc, char *argv[]){
     QList<int> ids;
 
     ids = server.loadIds();
-    if(!server.getSetting("OpenFiles").toBool()){
-        for(const int id : ids)
-            server.removeSettings(id);
-        ids.clear();
-    }
 
     if(ids.length() == 0)
         ids.append(server.nextID());

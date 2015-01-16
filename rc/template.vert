@@ -45,12 +45,12 @@ void main(){
         float st = sin(t);
         float ct = cos(t);
         mat4 turn = mat4(
-            st,  ct, 0, 0,
-            ct, -st, 0, 0,
-            0 , 0  , 1, 0,
-            0 , 0  , 0, 1
+            st, 0 , ct, 0,
+            0 , 1 ,  0, 0,
+            ct, 0 ,-st, 0,
+            0 , 0 ,  0, 1
         );
-        gl_Position =  MVP * turn * msVertPos * 0.005;
+        gl_Position = P * V * turn * M * msVertPos;
 
         // Position of the vertex, in worldspace : M * position
         wsPosition = (M * msVertPos).xyz;

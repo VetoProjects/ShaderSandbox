@@ -26,6 +26,8 @@ Q_OBJECT
 
 public:
     ObjectLoaderDialog(QDialog* parent = 0);
+    void setData(const QString &modelFile, const QVector3D &modelOffset,
+                 const QVector3D &modelScaling, const QVector3D &modelRotation);
 
 private Q_SLOTS:
    void load();

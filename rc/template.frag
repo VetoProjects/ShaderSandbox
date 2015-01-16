@@ -28,9 +28,6 @@ float right(float val){ return texture(audioRightData, val).r ; }
 
 
 void main(){
-    color = vec4(1,0,0,0);
-    return;
-
     // Light emission properties
     vec3 LightColor = vec3(1,1,1);
     float LightPower = 10.0f;
