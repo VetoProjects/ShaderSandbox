@@ -46,7 +46,6 @@ public:
         connect(runObj, SIGNAL(errored(QString,int)), this, SLOT(erroredReceived(QString, int)));
 
         runObj->resize(800, 600);
-        runObj->show();
 
     }
     bool updateCode(const QString &filename, const QString &vertexShader, const QString &fragmentShader){

@@ -566,10 +566,13 @@ void EditorWindow::setAsCurrentFile(const QString &vertexFile, const QString &fr
 
     // TODO: user fragmentFile as well
     setWindowFilePath(vertexFile);
+    QString title = "ShaderSandbox";
+
     if(vertexFile != "" && !vertexFile.contains("template."))
-        setWindowTitle("ShaderSandbox | " + stripName(vertexFile) + "[*]");
-    else
-        setWindowTitle("ShaderSandbox [*]");
+        title.append(" | ").append(stripName(vertexFile));
+    if(fragmentFile != "" && !fragmentFile.contains("template."))
+        title.append(" | ").append(stripName(fragmentFile));
+    setWindowTitle(title.append(" [*]"));
 }
 
 /**
