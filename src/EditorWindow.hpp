@@ -96,7 +96,6 @@ private:
     QAction *newAction;
     QAction *openAction;
     QAction *saveAction;
-    QAction *saveAsAction;
     QAction *exitAction;
     QAction *runAction;
     QAction *settingsAction;

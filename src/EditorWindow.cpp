@@ -64,7 +64,6 @@ EditorWindow::~EditorWindow(){
     delete newAction;
     delete openAction;
     delete saveAction;
-    delete saveAsAction;
     delete exitAction;
     delete runAction;
     delete settingsAction;
@@ -349,7 +348,6 @@ void EditorWindow::addMenus(){
     fMenu->addAction(newAction);
     fMenu->addAction(openAction);
     fMenu->addAction(saveAction);
-    fMenu->addAction(saveAsAction);
     fMenu->addSeparator();
     fMenu->addAction(exitAction);
 
