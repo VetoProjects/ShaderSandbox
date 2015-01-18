@@ -11,6 +11,7 @@
 #include <QMenuBar>
 #include <QStatusBar>
 #include <QSplitter>
+#include <QInputDialog>
 
 #include "CodeEditor.hpp"
 #include "ObjectLoaderDialog.hpp"
@@ -47,7 +48,6 @@ private Q_SLOTS:
     void docModified();
     void runFile();
     bool saveFile();
-    bool saveFileAs();
 
     void gotOpenHelp();
     void gotOpenSettings();
@@ -74,14 +74,15 @@ private:
     void addToolBars();
     void addStatusBar();
     void applySettings(const QHash<QString, QVariant> &);
-    void loadFile(const QString &);
-    bool saveFile(const QString &);
+    void loadFile(const QString &, bool v = false, bool f = false);
     bool saveDialog();
     void saveSettings();
     void setAsCurrentFile(const QString &vertexFile, const QString &fragmentFile);
     QString stripName(const QString &);
 
     int templateNum;
+
+    QString vertexName, fragmentName;
 
     QSplitter *codeEditors;
     CodeEditor *vertexCodeEditor, *fragmentCodeEditor;

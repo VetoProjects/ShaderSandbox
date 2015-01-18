@@ -134,40 +134,6 @@ void EditorWindow::openFile(){
 }
 
 /**
- * @brief EditorWindow::saveFile
- * @return the return codes of the
- *         saveFileAs()/saveFile(filename) functions
- *
- * reacts to the saveFile SIGNAL and redirects to
- * either saveFileAs() (if there is no filename assgined
- * to the current file) or saveFile(filename) (if there is
- * a name to the current file)(SLOT).
- */
-bool EditorWindow::saveFile(){
-    // TODO: what should we do?
-/*   if(currentFile.isEmpty()){
-        return saveFileAs();
-    }else{
-        return saveFile(currentFile);
-    } */
-    return true;
-}
-
-/**
- * @brief EditorWindow::saveFileAs
- * @return bool - false if the file choosing dialog
- *         failed/return code of the saveFile(filename)
- *         function otherwise
- *
- * opens a file choosing dialog and saves the contents
- * of the text editor under the chosen name(SLOT).
- */
-bool EditorWindow::saveFileAs(){
-    QString fileName = QFileDialog::getSaveFileName(this);
-    return !fileName.isEmpty() && saveFile(fileName);
-}
-
-/**
  * @brief EditorWindow::saveSettings
  *
  * saves own settings.
@@ -271,10 +237,11 @@ void EditorWindow::applySettings(const QHash<QString, QVariant> &settings){
     modelRotation.setZ(settings.value("modelRotationZ", 0).toFloat());
     objectLoaderDialog->setData(modelFile, modelOffset, modelScaling, modelRotation);
 
-    const QString vertexFile = settings.value("vertexFile", ":/rc/template.vert").toString();
-    const QString fragmentFile = settings.value("fragmentFile", ":/rc/template.frag").toString();
-    loadFile(vertexFile);
-    loadFile(fragmentFile);
+    vertexName = settings.value("vertexFile", ":/rc/template.vert").toString();
+    fragmentName = settings.value("fragmentFile", ":/rc/template.frag").toString();
+
+    loadFile(vertexName, true, false);
+    loadFile(fragmentName, false, true);
 }
 
 /**
@@ -346,11 +313,6 @@ void EditorWindow::addActions(){
     saveAction->setStatusTip(tr("Save the document to disk"));
     connect(saveAction, SIGNAL(triggered()), this, SLOT(saveFile()));
 
-    saveAsAction = new QAction(tr("Save &As..."), this);
-    saveAsAction->setShortcuts(QKeySequence::SaveAs);
-    saveAsAction->setStatusTip(tr("Save the document under a new name"));
-    connect(saveAsAction, SIGNAL(triggered()), this, SLOT(saveFileAs()));
-
     exitAction = new QAction(tr("E&xit"), this);
     exitAction->setShortcuts(QKeySequence::Quit);
     exitAction->setStatusTip(tr("Exit the application"));
@@ -371,8 +333,8 @@ void EditorWindow::addActions(){
     helpAction->setStatusTip(tr("Opens the Help"));
     connect(helpAction, SIGNAL(triggered()), this, SLOT(gotOpenHelp()));
 
-    loadObjectAction = new QAction(tr("Load Object"), this);
-    loadObjectAction->setStatusTip(tr("Loads an object in your 3D-Word"));
+    loadObjectAction = new QAction(QIcon(":/images/object.png"), tr("Load Object"), this);
+    loadObjectAction->setStatusTip(tr("Loads an object into your 3D-World"));
     connect(loadObjectAction, SIGNAL(triggered()), objectLoaderDialog, SLOT(show()));
 }
 
@@ -460,16 +422,23 @@ bool EditorWindow::saveDialog(){
  *
  * loads a file of a given name
  */
-void EditorWindow::loadFile(const QString &path){
+void EditorWindow::loadFile(const QString &path, bool v, bool f){
     QFileInfo fileInfo(path);
     QString suffix = fileInfo.suffix().toLower();
-    bool vertexFile = (suffix == "vs" || suffix == "vert" || suffix == "vertex" || suffix == "vertexshader");
-    bool fragmentFile = (suffix == "fs" || suffix == "frag" || suffix == "fragment" || suffix == "fragmentshader");
+    bool vertexFile = (suffix == "vs" || suffix == "vert" || suffix == "vertex" || suffix == "vertexshader") || v;
+    bool fragmentFile = (suffix == "fs" || suffix == "frag" || suffix == "fragment" || suffix == "fragmentshader") || f;
 
     if(!vertexFile && !fragmentFile){
-        QString msg = tr("File must be suffixed with vert, vertex, vertexshader, frag, fragment or fragmentshader.");
-        QMessageBox::warning(this, tr("ShaderSandbox"), msg);
-        return;
+        QStringList editor;
+        bool ok;
+        editor << "VertexShader" << "FragmentShader";
+        QString choice = QInputDialog::getItem(this, "Which file do you want to save", "Files: ", editor, 0, false, &ok);
+
+        if(!ok) return;
+        if(choice.compare("VertexShader"))
+            vertexFile = true;
+        else
+            fragmentFile = true;
     }
 
     QFile file(path);
@@ -516,13 +485,27 @@ void EditorWindow::loadFile(const QString &path){
  *
  * saves the current file under a provided name
  */
-bool EditorWindow::saveFile(const QString &name){
-    // TODO: how !? =/
+bool EditorWindow::saveFile(){
+    QStringList editor;
+    bool ok;
+    editor << "VertexShader" << "FragmentShader";
+    QString choice = QInputDialog::getItem(this, "Which file do you want to save", "Files: ", editor, 0, false, &ok);
 
-    QFile file(name);
+    if(!ok) return false;
+
+    QFile file;
+    if((choice.compare("VertexShader") && vertexName.isEmpty()))
+        file.setFileName(QFileDialog::getSaveFileName(this));
+    else if(choice.compare("FragmentShader") && fragmentName.isEmpty())
+        file.setFileName(QFileDialog::getSaveFileName(this));
+    else if(choice.compare("VertexShader"))
+        file.setFileName(vertexName);
+    else
+        file.setFileName(fragmentName);
+
     //display an error message if the file cannot be saved and why
     if(!file.open(QFile::WriteOnly | QFile::Text)){
-        warningDisplay(tr("Cannot write file %1:\n%2.").arg(name).arg(file.errorString()));
+        warningDisplay(tr("Cannot write file %1:\n%2.").arg(file.fileName()).arg(file.errorString()));
         return false;
     }
 
@@ -535,15 +518,19 @@ bool EditorWindow::saveFile(const QString &name){
     QApplication::setOverrideCursor(Qt::WaitCursor);
 #endif
 
-    out << vertexCodeEditor->toPlainText();
+    if(choice.compare("VertexShader")){
+        out << vertexCodeEditor->toPlainText();
+        vertexName = file.fileName();
+    } else {
+        out << fragmentCodeEditor->toPlainText();
+        fragmentName = file.fileName();
+    }
 
 #ifndef QT_NO_CURSOR
     QApplication::restoreOverrideCursor();
 #endif
 
-    //set current file and display a message in the status bar
-    // TODO: which file?
-//    setAsCurrentFile(name);
+    setAsCurrentFile(vertexName, fragmentName);
     statusBar()->showMessage(tr("File saved"), 2000);
     return true;
 }
