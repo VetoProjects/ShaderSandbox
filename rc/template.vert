@@ -36,37 +36,41 @@ float left (float val){ return texture(audioLeftData , val).r ; }
 float right(float val){ return texture(audioRightData, val).r ; }
 
 void main(){
-        // Prepare vectors for multiplication
-        vec4 msVertPos  = vec4(msVertexPosition, 1);
-        vec4 wsLightPos = vec4(wsLightPosition, 1);
+    float t = time / 1000;
+    float st = sin(t);
+    float ct = cos(t);
+    mat4 turn = mat4(
+        st, 0 , ct, 0,
+        0 , 1 ,  0, 0,
+        ct, 0 ,-st, 0,
+        0 , 0 ,  0, 1
+    );
 
-        // Output position of the vertex, in clip space : MVP * position
-        float t = time / 1000;
-        float st = sin(t);
-        float ct = cos(t);
-        mat4 turn = mat4(
-            st, 0 , ct, 0,
-            0 , 1 ,  0, 0,
-            ct, 0 ,-st, 0,
-            0 , 0 ,  0, 1
-        );
-        gl_Position = P * V * turn * M * msVertPos;
+    // manipulation of MVP before using it
+    mat4 m = turn * M, v = V, p = P, mv = v * m, mvp = p * mv;
 
-        // Position of the vertex, in worldspace : M * position
-        wsPosition = (M * msVertPos).xyz;
+    // Prepare vectors for multiplication
+    vec4 msVertPos  = vec4(msVertexPosition, 1);
+    vec4 wsLightPos = vec4(wsLightPosition, 1);
 
-        // Vector that goes from the vertex to the camera, in camera space.
-        // In camera space, the camera is at the origin (0,0,0).
-        vec3 csVertexPosition = (MV * msVertPos).xyz;
-        csEyeDirection = vec3(0,0,0) - csVertexPosition.xyz;
+    // Output position of the vertex, in clip space : MVP * position
+    gl_Position = mvp * msVertPos;
 
-        // Vector that goes from the vertex to the light, in camera space. M is ommited because it's identity.
-        vec3 csLightPosition = (V * wsLightPos).xyz ;
-        csLightDirection = csLightPosition + csEyeDirection;
+    // Position of the vertex, in worldspace : M * position
+    wsPosition = (m * msVertPos).xyz;
 
-        // Normal of the the vertex, in camera space
-        csNormal = (MV * vec4(msVertexNormal, 0)).xyz; // Only correct if ModelMatrix does not scale the model ! Use its inverse transpose if not.
+    // Vector that goes from the vertex to the camera, in camera space.
+    // In camera space, the camera is at the origin (0,0,0).
+    vec3 csVertexPosition = (mv * msVertPos).xyz;
+    csEyeDirection = vec3(0,0,0) - csVertexPosition.xyz;
 
-        // UV of the vertex. No special space for this one.
-        uv = vertexUV;
+    // Vector that goes from the vertex to the light, in camera space. M is ommited because it's identity.
+    vec3 csLightPosition = (v * wsLightPos).xyz ;
+    csLightDirection = csLightPosition + csEyeDirection;
+
+    // Normal of the the vertex, in camera space
+    csNormal = (mv * vec4(msVertexNormal, 0)).xyz; // Only correct if ModelMatrix does not scale the model ! Use its inverse transpose if not.
+
+    // UV of the vertex. No special space for this one.
+    uv = vertexUV;
 }
