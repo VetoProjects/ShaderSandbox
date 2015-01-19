@@ -401,8 +401,8 @@ bool EditorWindow::saveDialog(){
     if(vertexCodeEditor->document()->isModified() || fragmentCodeEditor->document()->isModified()){
         QMessageBox::StandardButton question;
         question = QMessageBox::warning(this, tr("VeToLC"),
-                                tr("The document has been modified"
-                                   " but is unsaved.\n"
+                                tr("The documents have been modified"
+                                   " but are unsaved.\n"
                                 "Do you want to save your changes?"),
                                 QMessageBox::Save | QMessageBox::Discard
                                 | QMessageBox::Cancel);
