@@ -1,19 +1,12 @@
 #include <QException>
 
-#include "AudioInputProcessorTest.hpp"
-#include "AudioOutputProcessorTest.hpp"
 #include "CodeEditorTest.hpp"
 #include "EditorWindowTest.hpp"
 #include "BackendTest.hpp"
 #include "RendererTest.hpp"
 #include "SettingsBackendTest.hpp"
 #include "RendererTest.hpp"
-#include "SoundGeneratorTest.hpp"
 #include "CodeHighlighterTest.hpp"
-#ifdef WITH_PYTHON
-#include "PySoundGeneratorTest.hpp"
-#include "PyLiveTest.hpp"
-#endif
 
 /**
  * @brief The Tests struct
@@ -54,18 +47,10 @@ int main(int argc, char** argv){
     struct Tests testcases[] = {
             {new QString("CodeEditor"), factory<CodeEditorTest>},
             {new QString("EditorWindow"), factory<EditorWindowTest>},
-            {new QString("AudioOutputProcessor"), factory<AudioOutputProcessorTest>},
-            {new QString("AudioInputProcessor"), factory<AudioInputProcessorTest>},
             {new QString("Backend"), factory<BackendTest>},
-            {new QString("SoundGenerator"), factory<SoundGeneratorTest>},
             {new QString("SettingsBackend"), factory<SettingsBackendTest>},
             {new QString("Renderer"), factory<RendererTest>},
-            {new QString("SoundGenerator"), factory<SoundGeneratorTest>},
             {new QString("CodeHighlighter"), factory<CodeHighlighterTest>}
-#ifdef WITH_PYTHON
-           ,{new QString("PySoundGenerator"), factory<PySoundGeneratorTest>},
-            {new QString("PyLiveInterpreter"), factory<PyLiveTest>},
-#endif							
             };
 	    
     unsigned int size = sizeof(testcases)/sizeof(Tests);

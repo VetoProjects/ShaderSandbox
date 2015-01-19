@@ -24,9 +24,7 @@ private slots:
         QVERIFY(codeHighlighter.get());
     }
     void updateTest(){
-        QVERIFY(codeHighlighter->setupHighlighting(1));
-        QVERIFY(codeHighlighter->setupHighlighting(1000) == false);
-        QVERIFY(codeHighlighter->setupHighlighting(-10) == false);
+        codeHighlighter->setupHighlighting();
     }
 private:
     std::unique_ptr<CodeHighlighter> codeHighlighter;

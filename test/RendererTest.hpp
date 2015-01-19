@@ -27,7 +27,7 @@ private slots:
                 this, SLOT(finishedTest(GlLiveThread*, QString, int)));
         connect(thread, SIGNAL(doneSignal(GlLiveThread*, QString)),
                  this, SLOT(doneTest(GlLiveThread*, QString)));
-        thread->initialize("Test", "This is not valid code;");
+        thread->initialize("Test", "This is not valid code;", "This as well");
         thread->start();
         QTest::qWait(1000);
         thread->terminate();
@@ -37,7 +37,7 @@ private slots:
                 this, SLOT(finishedCommandTest(GlLiveThread*, QString, int)));
         connect(thread, SIGNAL(doneSignal(GlLiveThread*, QString)),
                  this, SLOT(doneTest(GlLiveThread*, QString)));
-        thread->initialize("Test", "#version 330 core");
+        thread->initialize("Test", "#version 330 core", "#version 330 core");
         thread->start();
         QTest::qWait(1000);
         thread->terminate();
@@ -51,9 +51,8 @@ private slots:
     void finishedCommandTest(GlLiveThread* returnedThread, QString returned, int lineno){
         QVERIFY(returnedThread == thread);
         QVERIFY(returned != "");
-        QCOMPARE(returned, QStringLiteral("ERROR: Compiled fragment shader was corrupt."));
-        QCOMPARE(0, 1);
-        QVERIFY(lineno == 0);
+        QCOMPARE(returned, QStringLiteral("ERROR: 0:1: '' :  #version required and missing.\n"));
+        QVERIFY(lineno == 1);
     }
     void doneTest(GlLiveThread* returnedThread, QString err){
         QVERIFY(returnedThread == thread);

@@ -8,13 +8,15 @@ QT       += core gui multimedia testlib widgets
 TARGET = VetoLCTest
 TEMPLATE = app
 
-QMAKE_CXXFLAGS += -std=c++11 -Wall -DNDEBUG -O2 -pedantic
+QMAKE_CXXFLAGS += -Wall -DNDEBUG -O1 -pedantic
 macx {
     QMAKE_CXXFLAGS += -stdlib=libc++ -mmacosx-version-min=10.7
 }
 
 RESOURCES += \
     ../application.qrc
+
+CONFIG +=c++11
 
 translations.target = $$OUT_PWD/translations
 src = $$PWD/../translations
@@ -38,7 +40,6 @@ HEADERS += \
     ../src/Backend.hpp \
     SettingsBackendTest.hpp \
     ../src/SettingsBackend.hpp \
-    AudioInputProcessorTest.hpp \
     ../src/AudioInputProcessor.hpp \
     RendererTest.hpp \
     ../src/Instances/WindowInstance.hpp \
@@ -49,7 +50,9 @@ HEADERS += \
     ../src/CodeHighlighter.hpp \
     ../src/LiveThread.hpp \
     ../src/BootLoader.hpp \
-    ../src/Instances/IInstance.hpp
+    ../src/Instances/IInstance.hpp \
+    ../src/Model3D.hpp \
+    ../src/ObjectLoaderDialog.hpp
 
 SOURCES += \
     main.cpp \
@@ -63,4 +66,6 @@ SOURCES += \
     ../src/SettingsBackend.cpp \
     ../src/AudioInputProcessor.cpp \
     ../src/BootLoader.cpp \
-    ../src/Instances/WindowInstance.cpp
+    ../src/Instances/WindowInstance.cpp \
+    ../src/Model3D.cpp \
+    ../src/ObjectLoaderDialog.cpp
