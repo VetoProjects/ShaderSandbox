@@ -108,6 +108,7 @@ bool Renderer::init(){
     glFrontFace(GL_CW);
     glEnable(GL_TEXTURE_1D);
     glEnable(GL_TEXTURE_2D);
+    glEnable(GL_CULL_FACE);
 
     model.init();
     if(modelFile != "")

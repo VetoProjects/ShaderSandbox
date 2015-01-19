@@ -430,10 +430,10 @@ void EditorWindow::loadFile(const QString &path, bool v, bool f){
         QStringList editor;
         bool ok;
         editor << "VertexShader" << "FragmentShader";
-        QString choice = QInputDialog::getItem(this, "Which file do you want to save", "Files: ", editor, 0, false, &ok);
+        QString choice = QInputDialog::getItem(this, "Which file do you want to load", "Files: ", editor, 0, false, &ok);
 
         if(!ok) return;
-        if(choice.compare("VertexShader"))
+        if(choice == "VertexShader")
             vertexFile = true;
         else
             fragmentFile = true;
@@ -492,11 +492,11 @@ bool EditorWindow::saveFile(){
     if(!ok) return false;
 
     QFile file;
-    if((choice.compare("VertexShader") && vertexName.isEmpty()))
+    if((choice == "VertexShader" && vertexName.isEmpty()))
         file.setFileName(QFileDialog::getSaveFileName(this));
-    else if(choice.compare("FragmentShader") && fragmentName.isEmpty())
+    else if(choice == "FragmentShader" && fragmentName.isEmpty())
         file.setFileName(QFileDialog::getSaveFileName(this));
-    else if(choice.compare("VertexShader"))
+    else if(choice == "VertexShader")
         file.setFileName(vertexName);
     else
         file.setFileName(fragmentName);
@@ -516,7 +516,7 @@ bool EditorWindow::saveFile(){
     QApplication::setOverrideCursor(Qt::WaitCursor);
 #endif
 
-    if(choice.compare("VertexShader")){
+    if(choice == "VertexShader"){
         out << vertexCodeEditor->toPlainText();
         vertexName = file.fileName();
     } else {
