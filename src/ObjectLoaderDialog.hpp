@@ -12,6 +12,7 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QVector3D>
+#include <QKeyEvent>
 
 /**
  * @brief The SettingsWindow class
@@ -29,8 +30,11 @@ public:
     void setData(const QString &modelFile, const QVector3D &modelOffset,
                  const QVector3D &modelScaling, const QVector3D &modelRotation);
 
+public Q_SLOTS:
+    void keyPressEvent(QKeyEvent*);
+
 private Q_SLOTS:
-   void load();
+    void load();
     void selectFile();
 
 Q_SIGNALS:

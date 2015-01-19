@@ -6,8 +6,8 @@ ObjectLoaderDialog::ObjectLoaderDialog(QDialog* parent) : QDialog(parent){
 }
 
 void ObjectLoaderDialog::setupLayout(){
-    QPushButton* loadBut = new QPushButton(tr("Load Object"));
     QPushButton* closeBut = new QPushButton(tr("Cancel"));
+    QPushButton* loadBut = new QPushButton(tr("Load Object"));
     connect(loadBut, SIGNAL(clicked()), this, SLOT(load()));
     connect(closeBut, SIGNAL(clicked()), this, SLOT(close()));
 
@@ -77,7 +77,8 @@ void ObjectLoaderDialog::setupFileChooser(){
 }
 
 void ObjectLoaderDialog::selectFile(){
-    fileNameBox->setText(QFileDialog::getOpenFileName(this));
+    QString filename = QFileDialog::getOpenFileName(this);
+    if(filename != "") fileNameBox->setText(filename);
 }
 
 QVBoxLayout* ObjectLoaderDialog::setupLoaderLayout(){
@@ -166,4 +167,10 @@ void ObjectLoaderDialog::load(){
     qDebug() << objectFile << objectOffset << objectScaling << objectRotation;
     Q_EMIT objectInfo(objectFile, objectOffset, objectScaling, objectRotation);
     close();
+}
+
+void ObjectLoaderDialog::keyPressEvent(QKeyEvent *evt){
+    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
+        return;
+    QDialog::keyPressEvent(evt);
 }

@@ -1,5 +1,8 @@
 #include "EditorWindow.hpp"
 
+static const QString vertexTemplate = ":/rc/template.vert";
+static const QString fragmentTemplate = ":/rc/template.frag";
+
 /**
  * @brief EditorWindow::EditorWindow
  *
@@ -236,8 +239,8 @@ void EditorWindow::applySettings(const QHash<QString, QVariant> &settings){
     modelRotation.setZ(settings.value("modelRotationZ", 0).toFloat());
     objectLoaderDialog->setData(modelFile, modelOffset, modelScaling, modelRotation);
 
-    vertexName = settings.value("vertexFile", ":/rc/template.vert").toString();
-    fragmentName = settings.value("fragmentFile", ":/rc/template.frag").toString();
+    vertexName = settings.value("vertexFile", vertexTemplate).toString();
+    fragmentName = settings.value("fragmentFile", fragmentTemplate).toString();
 
     loadFile(vertexName, true, false);
     loadFile(fragmentName, false, true);
@@ -492,14 +495,16 @@ bool EditorWindow::saveFile(){
     if(!ok) return false;
 
     QFile file;
-    if((choice == "VertexShader" && vertexName.isEmpty()))
+    if(choice == "VertexShader" && (vertexName.isEmpty() || vertexName == vertexTemplate))
         file.setFileName(QFileDialog::getSaveFileName(this));
-    else if(choice == "FragmentShader" && fragmentName.isEmpty())
+    else if(choice == "FragmentShader" && (fragmentName.isEmpty() || fragmentName == fragmentTemplate))
         file.setFileName(QFileDialog::getSaveFileName(this));
     else if(choice == "VertexShader")
         file.setFileName(vertexName);
     else
         file.setFileName(fragmentName);
+
+    if(file.fileName().isEmpty()) return false;
 
     //display an error message if the file cannot be saved and why
     if(!file.open(QFile::WriteOnly | QFile::Text)){
