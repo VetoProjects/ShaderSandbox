@@ -38,6 +38,7 @@ public:
     void run() Q_DECL_OVERRIDE{
         if(runObj)
             runObj->show();
+        exec();
     }
     // No parent object =(
     void initialize(const QString &title, const QString &vertexShader, const QString &fragmentShader){
@@ -46,15 +47,12 @@ public:
         connect(runObj, SIGNAL(errored(QString,int)), this, SLOT(erroredReceived(QString, int)));
 
         runObj->resize(800, 600);
-
     }
     bool updateCode(const QString &filename, const QString &vertexShader, const QString &fragmentShader){
-        if(runObj)
-            return runObj->updateCode(filename, vertexShader, fragmentShader);
-        return false;
+        return runObj && runObj->updateCode(filename, vertexShader, fragmentShader);
     }
     bool loadModel(const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation){
-        return runObj->loadModel(file, offset, scaling, rotation);
+        return runObj && runObj->loadModel(file, offset, scaling, rotation);
     }
 
 public Q_SLOTS:
