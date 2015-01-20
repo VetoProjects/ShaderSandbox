@@ -77,7 +77,8 @@ Renderer::Renderer(const QString &path, const QString &vertexShader, const QStri
  * Free resources
  */
 Renderer::~Renderer(){
-    context->makeCurrent(this);
+    if(context)
+        context->makeCurrent(this);
     if(shaderProgram){
         shaderProgram->bind();
         for(QOpenGLTexture *texture : textures){
@@ -157,7 +158,7 @@ bool Renderer::init(){
  */
 bool Renderer::initShaders(QString vertexShader, QString fragmentShader){
     QList<QPair<QString, QString>> images;
-    QFileInfo codeFile(currentPath + ".frag");
+    QDir modelDir = QFileInfo(modelFile).dir();
 
     int pos = 0;
     while((pos = textureRegEx.indexIn(fragmentShader, pos)) != -1){
@@ -165,8 +166,8 @@ bool Renderer::initShaders(QString vertexShader, QString fragmentShader){
         QString imagePath = textureRegEx.cap(3).trimmed();
         QFileInfo textureImage;
 		
-        if(codeFile.exists())
-            textureImage = QFileInfo(codeFile.dir(), imagePath);
+        if(modelDir.exists())
+            textureImage = QFileInfo(modelDir, imagePath);
         else
             textureImage = QFileInfo(imagePath);
 
