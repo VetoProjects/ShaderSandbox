@@ -71,8 +71,8 @@ private:
     void runGlFile(IInstance *);
     void terminateThread(long id);
     QList<int> ids;
-    QHash<long, IInstance*> instances;
-    QHash<long, LiveThread*> threads;
+    QHash<long, std::shared_ptr<IInstance>> instances;
+    QHash<long, std::shared_ptr<LiveThread>> threads;
     void saveIDs();
 };
 

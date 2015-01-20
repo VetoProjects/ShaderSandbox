@@ -25,11 +25,11 @@ Backend::Backend(QObject *parent) : QObject(parent){
  * when all the windows closed.
  */
 Backend::~Backend(){
-    for(LiveThread *thread: threads.values()){
+    for(std::shared_ptr<LiveThread>thread: threads.values()){
         if(thread){
             if(thread->isRunning())
                 thread->terminate();
-            delete thread;
+            thread.reset();
         }
     }
 }
@@ -49,7 +49,7 @@ void Backend::addInstance(IInstance *instance, bool removeSettings){
         return;
     if(removeSettings)
         SettingsBackend::removeSettings(id);
-    instances.insert(id, instance);
+    instances.insert(id, std::shared_ptr<IInstance>(instance));
     connect(instance, SIGNAL(closing(IInstance*)),  this, SLOT(instanceClosing(IInstance *)));
     connect(instance, SIGNAL(destroyed(QObject*)),  this, SLOT(instanceDestroyed(QObject *)));
     connect(instance, SIGNAL(runCode(IInstance*)),  this, SLOT(instanceRunCode(IInstance *)));
@@ -148,9 +148,9 @@ bool Backend::removeInstance(Instances::IInstance *instance, bool removeSettings
 
 bool Backend::removeInstance(int id, bool removeSettings){
     if(instances.contains(id)){
-        disconnect(instances[id], SIGNAL(destroyed(QObject*)), this, SLOT(instanceDestroyed(QObject*)));
+        disconnect(instances[id].get(), SIGNAL(destroyed(QObject*)), this, SLOT(instanceDestroyed(QObject*)));
         if(!instances[id]->close()){
-            connect(instances[id], SIGNAL(destroyed(QObject*)), this, SLOT(instanceDestroyed(QObject*)));
+            connect(instances[id].get(), SIGNAL(destroyed(QObject*)), this, SLOT(instanceDestroyed(QObject*)));
             return false;
         }
         instances[id]->deleteLater();
@@ -175,7 +175,7 @@ bool Backend::removeInstance(int id, bool removeSettings){
 void Backend::childSaidCloseAll(){
     QList<int> notRemoved = ids;
     for(const int id : ids){
-        disconnect(instances[id], SIGNAL(destroyed(QObject*)), this, SLOT(instanceDestroyed(QObject*)));
+        disconnect(instances[id].get(), SIGNAL(destroyed(QObject*)), this, SLOT(instanceDestroyed(QObject*)));
         if(removeInstance(id, false))
             notRemoved.removeOne(id);
     }
@@ -415,10 +415,10 @@ void Backend::instanceLoadModel(IInstance *instance, const QString &file, const 
  * Creates a thread that executes GL source code.
  */
 void Backend::runGlFile(IInstance *instance){
-    GlLiveThread* thread = new GlLiveThread(instance->ID, this);
-    connect(thread, SIGNAL(doneSignal(GlLiveThread*, QString)),
+    std::shared_ptr<GlLiveThread> thread(new GlLiveThread(instance->ID, this));
+    connect(thread.get(), SIGNAL(doneSignal(GlLiveThread*, QString)),
             this, SLOT(getExecutionResults(GlLiveThread*, QString)));
-    connect(thread, SIGNAL(errorSignal(GlLiveThread*, QString, int)),
+    connect(thread.get(), SIGNAL(errorSignal(GlLiveThread*, QString, int)),
             this, SLOT(getError(GlLiveThread*, QString, int)));
     thread->initialize(instance->title(), instance->vertexSourceCode(), instance->fragmentSourceCode());
     thread->start();
