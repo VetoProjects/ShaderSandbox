@@ -20,8 +20,8 @@ class BackendTest : public QObject{
 Q_OBJECT
 private slots:
     void initTestCase() {
-        backend = std::unique_ptr<Backend>(new Backend());
-        instance = std::unique_ptr<WindowInstance>(new WindowInstance(100, QHash<QString, QVariant>()));
+        backend = std::shared_ptr<Backend>(new Backend());
+        instance = std::shared_ptr<WindowInstance>(new WindowInstance(100, QHash<QString, QVariant>()));
     }
     void objectCreationTest() {
         QVERIFY(backend.get());
@@ -42,7 +42,7 @@ private slots:
             backend->removeInstance(list[i]);
     }
     void settingsTest(){
-        instance = std::unique_ptr<WindowInstance>(new WindowInstance(1, QHash<QString, QVariant>()));
+        instance = std::shared_ptr<WindowInstance>(new WindowInstance(1, QHash<QString, QVariant>()));
         backend->addInstance(instance.get());
         QList<int> ids = backend->loadIds();
         for(int id : ids){
@@ -57,8 +57,8 @@ private slots:
         QVERIFY(!dir.exists());
     }
 private:
-    std::unique_ptr<Backend> backend;
-    std::unique_ptr<WindowInstance> instance;
+    std::shared_ptr<Backend> backend;
+    std::shared_ptr<WindowInstance> instance;
 };
 
 #endif // BACKENDTEST
