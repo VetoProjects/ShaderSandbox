@@ -53,7 +53,12 @@ Renderer::Renderer(const QString &path, const QString &vertexShader, const QStri
 
     setSurfaceType(QWindow::OpenGLSurface);
 
-    V.lookAt(QVector3D(0, 1, 2), QVector3D(0, 0, 0), QVector3D(0, 1, 0));
+    cameraPosition.setY(-1);
+    cameraPosition.setZ(-2);
+    cameraRotation = 0;
+    cameraPitch = 30;
+    V.rotate(cameraPitch, 1, 0, 0);
+    V.translate(cameraPosition);
     P.perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
 
     time = new QTime();
@@ -308,24 +313,41 @@ void Renderer::render(){
     if(!device)
         device = new QOpenGLPaintDevice();
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
     device->setSize(size());
 
 //    qDebug() << QLatin1String(reinterpret_cast<const char*>(glGetString(GL_VERSION))) << " " << QLatin1String(reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
     const qreal retinaScale = devicePixelRatio();
     glViewport(0, 0, width() * retinaScale, height() * retinaScale);
 
-    glClear(GL_COLOR_BUFFER_BIT);
-
     QPoint mouse = this->mapFromGlobal(QCursor::pos());
     QVector2D mousePosition((float)mouse.x() / (float)this->width(),
                             (float)mouse.y() / (float)this->height());
     float ration = ((this->height() == 0) ? 1 : (float)this->width() / (float)this->height());
 
+    handleInput();
 
     shaderProgramMutex.lock();
         shaderProgram->bind();
+        glClearColor(0, 0, 0.3, 1);
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+        glDisable(GL_SCISSOR_TEST);
+        glDisable(GL_STENCIL_TEST);
+        glDisable(GL_ALPHA_TEST);
+
+        glEnable(GL_DEPTH_TEST);
+        glClearDepth(1);
+        glDepthFunc(GL_LESS);
+
+        glDisable(GL_CULL_FACE);
+        glFrontFace(GL_CW);
+        glCullFace(GL_BACK);
+
+        glEnable(GL_TEXTURE_1D);
+        glEnable(GL_TEXTURE_2D);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         vao->bind();
         uploadMVP(); // attention: uncomment mutex => deadlock
 
@@ -364,6 +386,54 @@ void Renderer::render(){
         vao->release();
         shaderProgram->release();
     shaderProgramMutex.unlock();
+}
+
+void Renderer::handleInput(){
+    float timeDelta = time->elapsed() - lastTime;
+    lastTime = time->elapsed();
+
+    bool changed = false;
+    bool alt = pressedKeys.contains(Qt::Key_Alt);
+    bool ctrl = pressedKeys.contains(Qt::Key_Control);
+    bool shift = pressedKeys.contains(Qt::Key_Shift);
+    if(!mouseDelta.isNull()){
+        if(!alt && !ctrl && !shift){
+            changed = true;
+            cameraRotation += mouseDelta.x() * mouseSpeed;
+            cameraPitch += mouseDelta.y() * mouseSpeed;
+        }
+        mouseDelta = QPoint();
+    }
+
+    QVector3D offset;
+    if(pressedKeys.contains(Qt::Key_Up) || pressedKeys.contains(Qt::Key_W)){
+        changed = true;
+        offset.setZ(offset.z() + timeDelta * movementSpeed);
+    }
+    if(pressedKeys.contains(Qt::Key_Down) || pressedKeys.contains(Qt::Key_S)){
+        changed = true;
+        offset.setZ(offset.z() - timeDelta * movementSpeed);
+    }
+    if(pressedKeys.contains(Qt::Key_Right) || pressedKeys.contains(Qt::Key_D)){
+        changed = true;
+        offset.setX(offset.x() - timeDelta * movementSpeed);
+    }
+    if(pressedKeys.contains(Qt::Key_Left) || pressedKeys.contains(Qt::Key_A)){
+        changed = true;
+        offset.setX(offset.x() + timeDelta * movementSpeed);
+    }
+
+    if(changed){
+        V = QMatrix4x4();
+        V.rotate(-cameraRotation, 0, 1, 0);
+        V.rotate(-cameraPitch, 1, 0, 0);
+        cameraPosition += V * offset;
+
+        V = QMatrix4x4();
+        V.rotate(cameraPitch, 1, 0, 0);
+        V.rotate(cameraRotation, 0, 1, 0);
+        V.translate(cameraPosition);
+    }
 }
 
 /**
@@ -426,6 +496,8 @@ void Renderer::renderNow(){
  * and Q_EMIT doneSignal on close event.
  */
 bool Renderer::event(QEvent *event){
+    QMouseEvent *mouse;
+
     switch(event->type()){
     case QEvent::UpdateRequest:
         QCoreApplication::postEvent(this, new QEvent(QEvent::UpdateRequest));
@@ -434,6 +506,19 @@ bool Renderer::event(QEvent *event){
     case QEvent::Close:
         Q_EMIT doneSignal(tr("User closed renderer"));
         return true;
+    case QEvent::KeyPress:
+        pressedKeys.insert(((QKeyEvent*)event)->key());
+        return QWindow::event(event);
+    case QEvent::KeyRelease:
+        pressedKeys.remove((((QKeyEvent*)event)->key()));
+        return QWindow::event(event);
+    case QEvent::MouseMove:
+        mouse = (QMouseEvent*)event;
+        if(mouse->buttons() & Qt::LeftButton){
+            mouseDelta += mouse->pos() - lastMousePosition;
+        }
+        lastMousePosition = mouse->pos();
+        return QWindow::event(event);
     default:
         return QWindow::event(event);
     }

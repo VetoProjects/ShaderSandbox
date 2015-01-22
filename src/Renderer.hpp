@@ -12,6 +12,7 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QMutex>
+#include <QKeyEvent>
 
 #include "AudioInputProcessor.hpp"
 #include "Model3D.hpp"
@@ -50,6 +51,7 @@ protected:
 private:
     bool init();
     void render();
+    void handleInput();
     bool initShaders(QString, QString);
     QString currentPath;
     QColor clearColor;
@@ -76,7 +78,16 @@ private:
 
     QOpenGLDebugLogger* m_logger;
 
+    QVector3D cameraPosition;
+    float cameraRotation, cameraPitch;
+
     QRegExp textureRegEx;
+    QSet<int> pressedKeys;
+    QPoint lastMousePosition;
+    QPoint mouseDelta;
+    float lastTime;
+    float movementSpeed = 0.005;
+    float mouseSpeed = 0.2;
 
 //    static bool mapFormat(float *target, char *source, int count, const QAudioFormat &format);
 //    template <typename T>
