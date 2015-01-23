@@ -112,12 +112,45 @@ void EditorWindow::gotCloseAll()
  * opens a new, empty file in the editor(SLOT).
  */
 void EditorWindow::newFile(){
-    if(saveDialog()){
+    QStringList editor;
+    bool ok;
+    editor << "Both" << "VertexShader" << "FragmentShader";
+    QString choice = QInputDialog::getItem(this, "Which file do you want to save", "Files: ", editor, 0, false, &ok);
+
+    if(!ok) return;
+
+    if(choice == "VertexShader" || choice == "Both"){
+        if(vertexCodeEditor->document()->isModified()) {
+            QMessageBox::StandardButton question = QMessageBox::warning(this,
+                tr("ShaderSandbox"),
+                tr("The vertex shader have been modified but are unsaved.\n"
+                   "Do you want to save your changes?"),
+                QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+
+            if(question == QMessageBox::Cancel) return;
+            if(question == QMessageBox::Save && !saveFile("VertexShader")) return;
+        }
+
         vertexCodeEditor->clear();
+        setAsCurrentFile("", fragmentName);
+        loadFile(vertexTemplate);
+    }
+
+    if(choice == "FragmentShader" || choice == "Both"){
+        if(fragmentCodeEditor->document()->isModified()){
+            QMessageBox::StandardButton question = QMessageBox::warning(this,
+                tr("ShaderSandbox"),
+                tr("The fragment shader have been modified but are unsaved.\n"
+                   "Do you want to save your changes?"),
+                QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+
+            if(question == QMessageBox::Cancel) return;
+            if(question == QMessageBox::Save && !saveFile("FragmentShader")) return;
+        }
+
         fragmentCodeEditor->clear();
-        setAsCurrentFile("", "");
-        loadFile(":/rc/template.vert");
-        loadFile(":/rc/template.frag");
+        setAsCurrentFile(vertexName, "");
+        loadFile(fragmentTemplate);
     }
 }
 
@@ -403,7 +436,7 @@ void EditorWindow::addStatusBar(){
 bool EditorWindow::saveDialog(){
     if(vertexCodeEditor->document()->isModified() || fragmentCodeEditor->document()->isModified()){
         QMessageBox::StandardButton question;
-        question = QMessageBox::warning(this, tr("VeToLC"),
+        question = QMessageBox::warning(this, tr("ShaderSandbox"),
                                 tr("The documents have been modified"
                                    " but are unsaved.\n"
                                 "Do you want to save your changes?"),
@@ -426,8 +459,8 @@ bool EditorWindow::saveDialog(){
 void EditorWindow::loadFile(const QString &path, bool v, bool f){
     QFileInfo fileInfo(path);
     QString suffix = fileInfo.suffix().toLower();
-    bool vertexFile = (suffix == "vs" || suffix == "vert" || suffix == "vertex" || suffix == "vertexshader") || v;
-    bool fragmentFile = (suffix == "fs" || suffix == "frag" || suffix == "fragment" || suffix == "fragmentshader") || f;
+    bool vertexFile = !f && (v || suffix == "vs" || suffix == "vert" || suffix == "vertex" || suffix == "vertexshader");
+    bool fragmentFile = !v && (f || suffix == "fs" || suffix == "frag" || suffix == "fragment" || suffix == "fragmentshader");
 
     if(!vertexFile && !fragmentFile){
         QStringList editor;
@@ -489,22 +522,32 @@ void EditorWindow::loadFile(const QString &path, bool v, bool f){
 bool EditorWindow::saveFile(){
     QStringList editor;
     bool ok;
-    editor << "VertexShader" << "FragmentShader";
+    editor << "Both" << "VertexShader" << "FragmentShader";
     QString choice = QInputDialog::getItem(this, "Which file do you want to save", "Files: ", editor, 0, false, &ok);
 
     if(!ok) return false;
 
+    // if saving the vertex shader was not successful, save fragment shader anyway (& not &&)
+    if(choice == "Both")
+        return saveFile("VertexShader") & saveFile("FragmentShader");
+    else
+        return saveFile(choice);
+}
+
+bool EditorWindow::saveFile(QString shaderType){
     QFile file;
-    if(choice == "VertexShader" && (vertexName.isEmpty() || vertexName == vertexTemplate))
+    if(shaderType == "VertexShader" && (vertexName.isEmpty() || vertexName == vertexTemplate))
         file.setFileName(QFileDialog::getSaveFileName(this));
-    else if(choice == "FragmentShader" && (fragmentName.isEmpty() || fragmentName == fragmentTemplate))
+    else if(shaderType == "FragmentShader" && (fragmentName.isEmpty() || fragmentName == fragmentTemplate))
         file.setFileName(QFileDialog::getSaveFileName(this));
-    else if(choice == "VertexShader")
+    else if(shaderType == "VertexShader")
         file.setFileName(vertexName);
     else
         file.setFileName(fragmentName);
 
+
     if(file.fileName().isEmpty()) return false;
+
 
     //display an error message if the file cannot be saved and why
     if(!file.open(QFile::WriteOnly | QFile::Text)){
@@ -521,7 +564,7 @@ bool EditorWindow::saveFile(){
     QApplication::setOverrideCursor(Qt::WaitCursor);
 #endif
 
-    if(choice == "VertexShader"){
+    if(shaderType == "VertexShader"){
         out << vertexCodeEditor->toPlainText();
         vertexName = file.fileName();
     } else {

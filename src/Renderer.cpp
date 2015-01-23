@@ -329,7 +329,7 @@ void Renderer::render(){
         glDisable(GL_CULL_FACE);
         glDisable(GL_SCISSOR_TEST);
         glDisable(GL_STENCIL_TEST);
-        glDisable(GL_ALPHA_TEST);
+//        glDisable(GL_ALPHA_TEST);
 
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_TRUE);

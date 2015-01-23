@@ -76,6 +76,7 @@ private:
     void applySettings(const QHash<QString, QVariant> &);
     void loadFile(const QString &, bool v = false, bool f = false);
     bool saveDialog();
+    bool saveFile(QString shaderType);
     void saveSettings();
     void setAsCurrentFile(const QString &vertexFile, const QString &fragmentFile);
     QString stripName(const QString &);
