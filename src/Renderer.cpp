@@ -387,31 +387,56 @@ void Renderer::handleInput(){
     bool alt = pressedKeys.contains(Qt::Key_Alt);
     bool ctrl = pressedKeys.contains(Qt::Key_Control);
     bool shift = pressedKeys.contains(Qt::Key_Shift);
-    if(!mouseDelta.isNull()){
+    if(!mouseDragLeft.isNull()){
         if(!alt && !ctrl && !shift){
             changed = true;
-            cameraRotation += mouseDelta.x() * mouseSpeed;
-            cameraPitch += mouseDelta.y() * mouseSpeed;
+            cameraRotation += mouseDragLeft.x() * mouseRotationSpeed;
+            cameraPitch += mouseDragLeft.y() * mouseRotationSpeed;
         }
-        mouseDelta = QPoint();
+        mouseDragLeft = QPoint();
+    }
+
+    if(pressedKeys.contains(Qt::Key_Up)){
+        changed = true;
+        cameraPitch -= timeDelta * keyRotationSpeed;
+    }
+    if(pressedKeys.contains(Qt::Key_Down)){
+        changed = true;
+        cameraPitch += timeDelta * keyRotationSpeed;
+    }
+    if(pressedKeys.contains(Qt::Key_Right)){
+        changed = true;
+        cameraRotation += timeDelta * keyRotationSpeed;
+    }
+    if(pressedKeys.contains(Qt::Key_Left)){
+        changed = true;
+        cameraRotation -= timeDelta * keyRotationSpeed;
     }
 
     QVector3D offset;
-    if(pressedKeys.contains(Qt::Key_Up) || pressedKeys.contains(Qt::Key_W)){
+
+    if(!mouseDragRight.isNull()){
         changed = true;
-        offset.setZ(offset.z() + timeDelta * movementSpeed);
+        offset.setX(+ mouseDragRight.x() * mouseMovementSpeed);
+        offset.setY(- mouseDragRight.y() * mouseMovementSpeed);
+        mouseDragRight = QPoint();
     }
-    if(pressedKeys.contains(Qt::Key_Down) || pressedKeys.contains(Qt::Key_S)){
+
+    if(pressedKeys.contains(Qt::Key_W)){
         changed = true;
-        offset.setZ(offset.z() - timeDelta * movementSpeed);
+        offset.setZ(offset.z() + timeDelta * keyMovementSpeed);
     }
-    if(pressedKeys.contains(Qt::Key_Right) || pressedKeys.contains(Qt::Key_D)){
+    if(pressedKeys.contains(Qt::Key_S)){
         changed = true;
-        offset.setX(offset.x() - timeDelta * movementSpeed);
+        offset.setZ(offset.z() - timeDelta * keyMovementSpeed);
     }
-    if(pressedKeys.contains(Qt::Key_Left) || pressedKeys.contains(Qt::Key_A)){
+    if(pressedKeys.contains(Qt::Key_D)){
         changed = true;
-        offset.setX(offset.x() + timeDelta * movementSpeed);
+        offset.setX(offset.x() - timeDelta * keyMovementSpeed);
+    }
+    if(pressedKeys.contains(Qt::Key_A)){
+        changed = true;
+        offset.setX(offset.x() + timeDelta * keyMovementSpeed);
     }
 
     if(changed){
@@ -505,9 +530,8 @@ bool Renderer::event(QEvent *event){
         return QWindow::event(event);
     case QEvent::MouseMove:
         mouse = (QMouseEvent*)event;
-        if(mouse->buttons() & Qt::LeftButton){
-            mouseDelta += mouse->pos() - lastMousePosition;
-        }
+        if(mouse->buttons() & Qt::LeftButton)  mouseDragLeft  += mouse->pos() - lastMousePosition;
+        if(mouse->buttons() & Qt::RightButton) mouseDragRight += mouse->pos() - lastMousePosition;
         lastMousePosition = mouse->pos();
         return QWindow::event(event);
     default:

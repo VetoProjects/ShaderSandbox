@@ -84,10 +84,12 @@ private:
     QRegExp textureRegEx;
     QSet<int> pressedKeys;
     QPoint lastMousePosition;
-    QPoint mouseDelta;
+    QPoint mouseDragLeft, mouseDragRight;
     float lastTime;
-    float movementSpeed = 0.005;
-    float mouseSpeed = 0.2;
+    float keyMovementSpeed = 0.005;
+    float keyRotationSpeed = 0.2;
+    float mouseRotationSpeed = 0.2;
+    float mouseMovementSpeed = 0.005;
 
 //    static bool mapFormat(float *target, char *source, int count, const QAudioFormat &format);
 //    template <typename T>
