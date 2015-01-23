@@ -65,13 +65,11 @@ void LayoutTab::addLayout(){
     hlBoxLabel = new QLabel(tr("Highlighting:"));
     hlBox = new QComboBox;
     hlBox->addItem(tr("GLSL"));
-    hlBox->addItem(tr("Python"));
-    hlBox->addItem(tr("QT"));
     hlBox->addItem(tr("Variable Names"));    
     hlBox->addItem(tr("None"));
 
     int hlConfig = settings->value("Highlighting").toInt();
-    if(hlConfig >= 0 || hlConfig <= 4)
+    if(hlConfig >= 0 && hlConfig <= 2)
         hlBox->setCurrentIndex(hlConfig);
 
     connect(hlBox, SIGNAL(currentIndexChanged(int)),
