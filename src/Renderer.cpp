@@ -49,9 +49,18 @@ Renderer::Renderer(const QString &path, const QString &vertexShader, const QStri
 
     connect(m_logger, SIGNAL(messageLogged(QOpenGLDebugMessage)),
              this, SLOT(onMessageLogged(QOpenGLDebugMessage)),
-             Qt::DirectConnection );
+             Qt::DirectConnection);
 
     setSurfaceType(QWindow::OpenGLSurface);
+
+    QSurfaceFormat format;
+    format.setRenderableType(QSurfaceFormat::OpenGL);
+    format.setVersion(3, 3);
+    format.setSamples(4);
+    format.setProfile(QSurfaceFormat::CoreProfile);
+    format.setOption(QSurfaceFormat::DebugContext);
+    format.setDepthBufferSize(24);
+    setFormat(format);
 
     cameraPosition.setY(-1);
     cameraPosition.setZ(-2);
@@ -67,13 +76,6 @@ Renderer::Renderer(const QString &path, const QString &vertexShader, const QStri
     audio = new AudioInputProcessor(this);
     connect(audio, SIGNAL(processData(QByteArray)), this, SLOT(updateAudioData(QByteArray)));
     audio->start();
-
-    QSurfaceFormat format;
-    format.setMajorVersion(3);
-    format.setMinorVersion(3);
-    format.setSamples(4);
-    format.setProfile(QSurfaceFormat::CoreProfile);
-    setFormat(format);
 }
 
 /**
@@ -108,14 +110,6 @@ Renderer::~Renderer(){
  * Allocates grafic memory and initialize the shader program
  */
 bool Renderer::init(){
-    glClearColor(0, 0, 0.3, 1);
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-    glFrontFace(GL_CW);
-    glEnable(GL_TEXTURE_1D);
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_CULL_FACE);
-
     model.init();
     if(modelFile != "")
         model.loadModel(modelFile.toStdString());
@@ -332,20 +326,17 @@ void Renderer::render(){
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+        glDisable(GL_CULL_FACE);
         glDisable(GL_SCISSOR_TEST);
         glDisable(GL_STENCIL_TEST);
         glDisable(GL_ALPHA_TEST);
 
         glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
         glClearDepth(1);
         glDepthFunc(GL_LESS);
 
-        glDisable(GL_CULL_FACE);
-        glFrontFace(GL_CW);
-        glCullFace(GL_BACK);
 
-        glEnable(GL_TEXTURE_1D);
-        glEnable(GL_TEXTURE_2D);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         vao->bind();
