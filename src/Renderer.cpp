@@ -19,7 +19,7 @@ const QString Renderer::defaultFragmentShader = QString(QFile(":/rc/template.fra
  *
  * Create a new Renderer with default shader
  */
-Renderer::Renderer(QWindow *parent) : Renderer::Renderer("new", defaultVertexShader, defaultFragmentShader, parent){ }
+Renderer::Renderer(QWindow *parent) : Renderer::Renderer(defaultVertexShader, defaultFragmentShader, parent){ }
 
 /**
  * @brief Renderer::Renderer
@@ -29,9 +29,8 @@ Renderer::Renderer(QWindow *parent) : Renderer::Renderer("new", defaultVertexSha
  *
  * Create a new Renderer with given code and set filename as title
  */
-Renderer::Renderer(const QString &path, const QString &vertexShader, const QString &fragmentShader, QWindow *parent) :
+Renderer::Renderer(const QString &vertexShader, const QString &fragmentShader, QWindow *parent) :
     QWindow(parent),
-    currentPath(path),
     clearColor(Qt::black),
     context(0), device(0),
     time(0),
@@ -43,7 +42,7 @@ Renderer::Renderer(const QString &path, const QString &vertexShader, const QStri
     vertexSource(vertexShader), fragmentSource(fragmentShader),
     textureRegEx("(^|\n|\r)\\s*#texture\\s+([A-Za-z_][A-Za-z0-9_]*)\\s+([^\n\r]+)")
 {
-    setTitle(path);
+    setTitle("ShaderSandbox Renderer");
 
     m_logger = new QOpenGLDebugLogger( this );
 
@@ -557,11 +556,9 @@ void Renderer::exposeEvent(QExposeEvent *){
  *
  * Set new title and compile new code for the shader program
  */
-bool Renderer::updateCode(const QString &path, const QString &vertCode, const QString &fragCode){
+bool Renderer::updateCode(const QString &vertCode, const QString &fragCode){
     if(!initShaders(vertCode, fragCode))
         return false;
-    currentPath = path;
-    setTitle(path);
     show();
     return true;
 }
@@ -682,6 +679,8 @@ bool Renderer::loadModel(const QString &file, const QVector3D &offset, const QVe
         if(!ok)
             return false;
     }
+
+    setTitle("ShaderSandbox | " + file);
 
     modelFile = file;
     modelOffset = offset;

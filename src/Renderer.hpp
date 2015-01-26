@@ -28,7 +28,7 @@ class Renderer : public QWindow, protected QOpenGLFunctions
     Q_OBJECT
 public:
     explicit Renderer(QWindow *parent = 0);
-    explicit Renderer(const QString &, const QString &vertexShader, const QString &fragmentShader, QWindow *parent = 0);
+    explicit Renderer(const QString &vertexShader, const QString &fragmentShader, QWindow *parent = 0);
     ~Renderer();
 
 Q_SIGNALS:
@@ -38,10 +38,10 @@ Q_SIGNALS:
 public Q_SLOTS:
     void renderNow();
     void renderLater();
-    bool updateCode(const QString &, const QString &, const QString &);
+    bool updateCode(const QString &, const QString &);
     void updateAudioData(QByteArray);
     void onMessageLogged(QOpenGLDebugMessage message);
-    bool loadModel(const QString &, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation);
+    bool loadModel(const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation);
     void uploadMVP();
 
 protected:
@@ -53,7 +53,6 @@ private:
     void render();
     void handleInput();
     bool initShaders(QString, QString);
-    QString currentPath;
     QColor clearColor;
     QOpenGLContext *context;
     QOpenGLPaintDevice *device;

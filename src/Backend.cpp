@@ -50,22 +50,18 @@ void Backend::addInstance(IInstance *instance, bool removeSettings){
     if(removeSettings)
         SettingsBackend::removeSettings(id);
     instances.insert(id, std::shared_ptr<IInstance>(instance));
-    connect(instance, SIGNAL(closing(IInstance*)),  this, SLOT(instanceClosing(IInstance *)));
-    connect(instance, SIGNAL(destroyed(QObject*)),  this, SLOT(instanceDestroyed(QObject *)));
-    connect(instance, SIGNAL(runCode(IInstance*)),  this, SLOT(instanceRunCode(IInstance *)));
-    connect(instance, SIGNAL(stopCode(IInstance*)), this, SLOT(instanceStopCode(IInstance *)));
-    connect(instance, SIGNAL(changeSetting (IInstance*, const QString, const QVariant&)),
-            this, SLOT(instanceChangedSetting(IInstance*, const QString&, const QVariant&)));
-    connect(instance, SIGNAL(getSetting(IInstance*, const QString, QVariant&)),
-            this, SLOT(instanceRequestSetting(IInstance*, const QString&, QVariant&)));
-    connect(instance, SIGNAL(changeSettings(IInstance*, const QHash<QString,QVariant>&)),
-            this, SLOT(instanceChangedSettings(IInstance*, const QHash<QString,QVariant>&)));
-    connect(instance, SIGNAL(getSettings(IInstance*, QHash<QString,QVariant>&)),
-            this, SLOT(instanceRequestSettings(IInstance*, QHash<QString,QVariant>&)));
-    connect(instance, SIGNAL(closeAll()), this, SLOT(childSaidCloseAll()));
-    connect(instance, SIGNAL(openSettings(IInstance*)), this, SLOT(settingsWindowRequested(IInstance*)));
-    connect(instance, SIGNAL(openHelp(IInstance*)), this, SLOT(openHelp(IInstance*)));
-    connect(instance, &IInstance::loadModel, this, &Backend::instanceLoadModel);
+    connect(instance, &IInstance::closing,        this, &Backend::instanceClosing);
+    connect(instance, &IInstance::destroyed,      this, &Backend::instanceDestroyed);
+    connect(instance, &IInstance::runCode,        this, &Backend::instanceRunCode);
+    connect(instance, &IInstance::stopCode,       this, &Backend::instanceStopCode);
+    connect(instance, &IInstance::changeSetting,  this, &Backend::instanceChangedSetting);
+    connect(instance, &IInstance::getSetting,     this, &Backend::instanceRequestSetting);
+    connect(instance, &IInstance::changeSettings, this, &Backend::instanceChangedSettings);
+    connect(instance, &IInstance::getSettings,    this, &Backend::instanceRequestSettings);
+    connect(instance, &IInstance::closeAll,       this, &Backend::childSaidCloseAll);
+    connect(instance, &IInstance::openSettings,   this, &Backend::settingsWindowRequested);
+    connect(instance, &IInstance::openHelp,       this, &Backend::openHelp);
+    connect(instance, &IInstance::loadModel,      this, &Backend::instanceLoadModel);
     ids.append(id);
     saveIDs();
 }
@@ -148,9 +144,9 @@ bool Backend::removeInstance(Instances::IInstance *instance, bool removeSettings
 
 bool Backend::removeInstance(int id, bool removeSettings){
     if(instances.contains(id)){
-        disconnect(instances[id].get(), SIGNAL(destroyed(QObject*)), this, SLOT(instanceDestroyed(QObject*)));
+        disconnect(instances[id].get(), &IInstance::destroyed, this, &Backend::instanceDestroyed);
         if(!instances[id]->close()){
-            connect(instances[id].get(), SIGNAL(destroyed(QObject*)), this, SLOT(instanceDestroyed(QObject*)));
+            connect(instances[id].get(), &IInstance::destroyed, this, &Backend::instanceDestroyed);
             return false;
         }
         instances[id]->deleteLater();
@@ -175,7 +171,7 @@ bool Backend::removeInstance(int id, bool removeSettings){
 void Backend::childSaidCloseAll(){
     QList<int> notRemoved = ids;
     for(auto id : ids){
-        disconnect(instances[id].get(), SIGNAL(destroyed(QObject*)), this, SLOT(instanceDestroyed(QObject*)));
+        disconnect(instances[id].get(), &IInstance::destroyed, this, &Backend::instanceDestroyed);
         if(removeInstance(id, false))
             notRemoved.removeOne(id);
     }
@@ -307,13 +303,9 @@ void Backend::instanceRunCode(IInstance *instance)
 {
     long id = instance->ID;
     if(threads.contains(id)){
-        bool worked = threads[id]->updateCode(instance->title(), instance->vertexSourceCode(), instance->fragmentSourceCode());
+        bool worked = threads[id]->updateCode(instance->vertexSourceCode(), instance->fragmentSourceCode());
         if(!worked){
-            // Dont't stop!
-//            instances[id]->codeStopped();
             instances[id]->reportError(tr("Code is faulty."));
-//            if(!threads[id]->isRunning())
-//                terminateThread(id);
         }
     }else{
         runGlFile(instance);
@@ -416,11 +408,9 @@ void Backend::instanceLoadModel(IInstance *instance, const QString &file, const 
  */
 void Backend::runGlFile(IInstance *instance){
     std::shared_ptr<GlLiveThread> thread(new GlLiveThread(instance->ID, this));
-    connect(thread.get(), SIGNAL(doneSignal(GlLiveThread*, QString)),
-            this, SLOT(getExecutionResults(GlLiveThread*, QString)));
-    connect(thread.get(), SIGNAL(errorSignal(GlLiveThread*, QString, int)),
-            this, SLOT(getError(GlLiveThread*, QString, int)));
-    thread->initialize(instance->title(), instance->vertexSourceCode(), instance->fragmentSourceCode());
+    connect(thread.get(), &GlLiveThread::doneSignal,  this, &Backend::getExecutionResults);
+    connect(thread.get(), &GlLiveThread::errorSignal, this, &Backend::getError);
+    thread->initialize(instance->vertexSourceCode(), instance->fragmentSourceCode());
     thread->start();
     threads.insert(thread->ID, thread);
 }
@@ -433,8 +423,7 @@ void Backend::runGlFile(IInstance *instance){
  */
 void Backend::getExecutionResults(GlLiveThread* thread, QString returnedException){
     // Already gone?
-    disconnect(thread, SIGNAL(doneSignal(GlLiveThread*, QString)),
-            this, SLOT(getExecutionResults(GlLiveThread*, QString)));
+    disconnect(thread, &GlLiveThread::doneSignal, this, &Backend::getExecutionResults);
     instances[thread->ID]->reportWarning(returnedException);
     terminateThread(thread->ID);
 }
