@@ -1,5 +1,6 @@
 #include "EditorWindow.hpp"
 
+// no constexpr, because QString is not a literal type
 static const QString vertexTemplate = ":/rc/template.vert";
 static const QString fragmentTemplate = ":/rc/template.frag";
 

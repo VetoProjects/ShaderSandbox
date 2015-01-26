@@ -98,7 +98,7 @@ bool Model3D::loadModel(const std::string &path, bool smooth){
                 unsigned
                     even[] = {iHalf + 1        , count - iHalf - 1, iHalf},
                     odd [] = {count - iHalf - 1, iHalf + 1        , count - iHalf - 2};
-                for(unsigned j : (i%2 ? odd : even)){
+                for(auto j : (i%2 ? odd : even)){
                     tempVertexIndices.push_back(vertexIndex[j]);
                     tempUVIndices    .push_back(uvIndex	   [j]);
                     tempNormalIndices.push_back(normalIndex[j]);
@@ -149,22 +149,22 @@ bool Model3D::loadModel(const std::string &path, bool smooth){
         }
         if(found >= 0){
             if(smooth)
-                for(short edge : {0, 1, 2})
+                for(auto edge : {0, 1, 2})
                     normals[found * 3 + edge] += tempNormals[i][edge];
             // ++reused;
             vertex_indices.push_back(found);
         }else{
             vertex_indices.push_back(vertices.size() / 3);
-            for(short edge  : {0, 1, 2}) vertices.push_back(tempVertices[tempVertexIndices[i]][edge ]);
-            for(short coord : {0, 1   }) uvs     .push_back(tempUVs     [tempUVIndices    [i]][coord]);
-            for(short edge  : {0, 1, 2}) normals .push_back(tempNormals [tempNormalIndices[i]][edge ]);
+            for(auto edge  : {0, 1, 2}) vertices.push_back(tempVertices[tempVertexIndices[i]][edge ]);
+            for(auto coord : {0, 1   }) uvs     .push_back(tempUVs     [tempUVIndices    [i]][coord]);
+            for(auto edge  : {0, 1, 2}) normals .push_back(tempNormals [tempNormalIndices[i]][edge ]);
         }
     }
     if(smooth)
         for(unsigned i = 0; i < normals.size(); i += 3){
             QVector3D normal = QVector3D(normals[i], normals[i+1], normals[i+2]);
             normal.normalize();
-            for(short edge : {0, 1, 2})
+            for(auto edge : {0, 1, 2})
                 normals[i + edge] = normal[edge];
         }
 //    cout << "reused: " << reused << endl;

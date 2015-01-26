@@ -34,11 +34,11 @@ void CodeHighlighter::setupHighlighting(){
 //    rule.format.setFontWeight(QFont::Bold);
     QStringList keywordPatterns;
     QString keywords = QTextStream(&highlighting).readAll();
-    for(const QString in: keywords.split("\n")){
+    for(auto in: keywords.split("\n")){
         if(in != "")
             keywordPatterns << in;
     }
-    for(const QString &pattern: keywordPatterns){
+    for(auto &pattern: keywordPatterns){
         rule.pattern = QRegExp(pattern);
         Rules.append(rule);
     }
@@ -112,7 +112,7 @@ void CodeHighlighter::highlightBlock(const QString &text){
      * goes through the text once for each rule and
      * highlights the code according to those
      */
-    for(const Rule &rule: Rules){
+    for(auto &rule: Rules){
         QRegExp regEx(rule.pattern);
         int i = regEx.indexIn(text);
         while(i >= 0){

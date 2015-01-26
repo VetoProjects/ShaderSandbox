@@ -44,7 +44,7 @@ void LayoutTab::addLayout(){
     designBoxLabel = new QLabel(tr("Design:"));
     designBox = new QComboBox;
     QString designConfig = settings->value("Design").toString();
-    for(const QString style : QStyleFactory::keys()){
+    for(auto style : QStyleFactory::keys()){
         designBox->addItem(style);
         if(designConfig == style)
             designBox->setCurrentIndex(designBox->count() - 1);
@@ -154,7 +154,7 @@ void LayoutTab::languageSettings(int index){
 /**
  * @brief BehaviourTab::BehaviourTab
  *
- * Construcotr of the BehaviourTab class.
+ * Constructor of the BehaviourTab class.
  * Calls addLayout().
  */
 BehaviourTab::BehaviourTab(QHash<QString, QVariant> *Settings, QWidget* parent) : SettingsTab(Settings, parent){

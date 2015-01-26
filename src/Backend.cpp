@@ -25,7 +25,7 @@ Backend::Backend(QObject *parent) : QObject(parent){
  * when all the windows closed.
  */
 Backend::~Backend(){
-    for(std::shared_ptr<LiveThread>thread: threads.values()){
+    for(auto &thread : threads.values()){
         if(thread){
             if(thread->isRunning())
                 thread->terminate();
@@ -92,9 +92,9 @@ int Backend::nextID(){
  */
 QList<int> Backend::loadIds()
 {
-    QVariantList ids = SettingsBackend::getSettingsFor("Instances", QVariantList()).toList();
+    QVariantList ids = SettingsBackend::getSettingsFor(QStringLiteral("Instances"), QVariantList()).toList();
     QList<int> res;
-    for(const QVariant id : ids){
+    for(auto id : ids){
         bool ok;
         int i = id.toInt(&ok);
         if(ok)
@@ -174,13 +174,13 @@ bool Backend::removeInstance(int id, bool removeSettings){
  */
 void Backend::childSaidCloseAll(){
     QList<int> notRemoved = ids;
-    for(const int id : ids){
+    for(auto id : ids){
         disconnect(instances[id].get(), SIGNAL(destroyed(QObject*)), this, SLOT(instanceDestroyed(QObject*)));
         if(removeInstance(id, false))
             notRemoved.removeOne(id);
     }
     if(!notRemoved.empty()){
-        for(const int id : ids)
+        for(auto id : ids)
             if(!notRemoved.contains(id))
                SettingsBackend::removeSettings(id);
         ids = notRemoved;
@@ -469,7 +469,7 @@ void Backend::terminateThread(long id){
  */
 void Backend::saveIDs(){
     QVariantList vids;
-    for(const int i : ids)
+    for(auto i : ids)
         vids.append(i);
     SettingsBackend::addSettings("Instances", vids);
 }

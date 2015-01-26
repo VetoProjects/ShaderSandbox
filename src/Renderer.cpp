@@ -88,7 +88,7 @@ Renderer::~Renderer(){
         context->makeCurrent(this);
     if(shaderProgram){
         shaderProgram->bind();
-        for(QOpenGLTexture *texture : textures){
+        for(auto *texture : textures){
             texture->destroy();
             delete texture;
         }
@@ -230,7 +230,7 @@ bool Renderer::initShaders(QString vertexShader, QString fragmentShader){
     }
 
     QList<QOpenGLTexture*> newTextures;
-    for(const QPair<QString, QString> image: images){
+    for(auto image: images){
 
         QOpenGLTexture* texture = new QOpenGLTexture(QImage(image.second));
 
@@ -246,7 +246,7 @@ bool Renderer::initShaders(QString vertexShader, QString fragmentShader){
 
         if(shaderProgram){
             shaderProgram->bind();
-            for(QOpenGLTexture *texture : textures){
+            for(auto *texture : textures){
                 texture->destroy();
                 delete texture;
             }

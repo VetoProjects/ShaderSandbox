@@ -6,6 +6,7 @@
 #include "Instances/WindowInstance.hpp"
 #include "ObjectLoaderDialog.hpp"
 
+// no constexpr, because QString is not a literal type
 static const QString socketName = "VeTo";
 
 /**
@@ -48,7 +49,7 @@ int main(int argc, char *argv[]){
     if(ids.length() == 0)
         ids.append(server.nextID());
 
-    for(const int id : ids){
+    for(auto id : ids){
         QHash<QString,QVariant> settings = server.getSettings(id);
         Instances::WindowInstance *instance = new Instances::WindowInstance(id, settings, &server);
         server.addInstance(instance, false);
