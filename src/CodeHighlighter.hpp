@@ -17,14 +17,14 @@ class CodeHighlighter : public QSyntaxHighlighter{
 
 public:
     CodeHighlighter(QTextDocument *parent = 0);
-    void setupHighlighting();
+    void setupHighlighting() noexcept;
 
 protected:
-    void highlightBlock(const QString &text);
+    void highlightBlock(const QString &text) noexcept;
 
 private:
-    CodeHighlighter& operator=(const CodeHighlighter& rhs);
-    CodeHighlighter& operator=(CodeHighlighter&& rhs);
+    CodeHighlighter& operator=(const CodeHighlighter& rhs) noexcept;
+    CodeHighlighter& operator=(CodeHighlighter&& rhs) noexcept;
 
     struct Rule{
         QRegExp pattern;

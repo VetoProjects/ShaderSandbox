@@ -35,7 +35,7 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent){
  * Helper function that computes the width of the line that is
  * to be highlighted.
  */
-int CodeEditor::lineHighlightingWidth(){
+int CodeEditor::lineHighlightingWidth() noexcept{
     int digits = 1,
     maxLen = qMax(1, blockCount());
     //computes how many blocks we have
@@ -54,7 +54,7 @@ int CodeEditor::lineHighlightingWidth(){
  *
  * sets the highlighting whenever the block count changes(SLOT)
  */
-void CodeEditor::updatelineHighlightingWidth(){
+void CodeEditor::updatelineHighlightingWidth() noexcept{
     setViewportMargins(lineHighlightingWidth(), 0, 0, 0);
 }
 
@@ -66,7 +66,7 @@ void CodeEditor::updatelineHighlightingWidth(){
  * updates the line numbers whenever an update
  * is requested(SLOT)
  */
-void CodeEditor::updatelineHighlighting(const QRect &rect, int delta_y){
+void CodeEditor::updatelineHighlighting(const QRect &rect, int delta_y) noexcept{
     if(delta_y)
         lineHighlighting->scroll(0, delta_y);
     else
@@ -83,7 +83,7 @@ void CodeEditor::updatelineHighlighting(const QRect &rect, int delta_y){
  *
  * catches the resize signal and customizes the update(SLOT)
  */
-void CodeEditor::resizeEvent(QResizeEvent *e){
+void CodeEditor::resizeEvent(QResizeEvent *e) noexcept{
     QPlainTextEdit::resizeEvent(e);
 
     QRect rect = contentsRect();
@@ -97,7 +97,7 @@ void CodeEditor::resizeEvent(QResizeEvent *e){
  * TODO: set the selections list up in the if-branch and only
  *       call setExtraSelections in there. is that correct?
  */
-void CodeEditor::highlightCurrentLine(){
+void CodeEditor::highlightCurrentLine() noexcept{
     if(!isReadOnly()){
         QTextEdit::ExtraSelection selection;
 
@@ -120,7 +120,7 @@ void CodeEditor::highlightCurrentLine(){
  * updates the line highlighting whenever scrolling happens;
  * invoked from updateLineHighlighting().
  */
-void CodeEditor::lineHighlightingPaintEvent(QPaintEvent *event){
+void CodeEditor::lineHighlightingPaintEvent(QPaintEvent *event) noexcept{
     //computes first and last block numbers
     QTextBlock textBlock = firstVisibleBlock();
     int textBlockNum = textBlock.blockNumber();
@@ -155,7 +155,7 @@ void CodeEditor::lineHighlightingPaintEvent(QPaintEvent *event){
  *
  * highlights the line given as argument as errored.
  */
-void CodeEditor::highlightErroredLine(int lineno){
+void CodeEditor::highlightErroredLine(int lineno) noexcept{
     QTextCursor cursor(document()->findBlockByLineNumber(lineno-1));
     QTextEdit::ExtraSelection selection;
 
@@ -181,7 +181,7 @@ void CodeEditor::highlightErroredLine(int lineno){
  * intercepts the keyPressEvent e so that a tab is rendered
  * as 4 spaces.
  */
-void CodeEditor::keyPressEvent(QKeyEvent *e){
+void CodeEditor::keyPressEvent(QKeyEvent *e) noexcept{
     if(e->key() == Qt::Key_Tab){
         insertPlainText("    ");
         e->accept();

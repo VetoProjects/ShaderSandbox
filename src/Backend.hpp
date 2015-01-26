@@ -25,23 +25,24 @@ class Backend : public QObject
 {
     Q_OBJECT
 public:
-    static QDir directoryOf(const QString&);
+    static QDir directoryOf(const QString&) noexcept;
     explicit Backend(QObject *parent = 0);
     ~Backend();
-    void addInstance(IInstance *, bool = true);
-    void childExited(IInstance *, QString);
-    bool isLast();
-    bool removeInstance(IInstance*, bool = true);
-    bool removeInstance(int, bool = true);
-    void removeSettings(IInstance*);
-    void removeSettings(int);
-    void saveAllSettings();
-    void saveSettings(IInstance *, QString);
-    QHash<QString, QVariant> getSettings(IInstance *);
-    QHash<QString, QVariant> getSettings(int id);
-    int nextID();
-    QList<int> loadIds();
-    QVariant getSetting(QString key, QVariant defaultValue = QVariant());
+    void addInstance(IInstance *, bool = true) noexcept;
+    void childExited(IInstance *, QString) noexcept;
+    bool isLast() noexcept;
+    bool removeInstance(IInstance*, bool = true) noexcept;
+    bool removeInstance(int, bool = true) noexcept;
+    void removeSettings(IInstance*) noexcept;
+    void removeSettings(int) noexcept;
+    void saveAllSettings() noexcept;
+    void saveSettings(IInstance *, QString) noexcept;
+    QHash<QString, QVariant> getSettings(IInstance *) noexcept;
+    QHash<QString, QVariant> getSettings(int id) noexcept;
+    int nextID() noexcept;
+    QList<int> loadIds() noexcept;
+    QVariant getSetting(QString key, QVariant defaultValue = QVariant()) noexcept;
+
 Q_SIGNALS:
     void warningSignal(QWidget*, QString);
     void closeAction();
@@ -50,30 +51,30 @@ Q_SIGNALS:
     void childDoSaveSettings();
 
 public Q_SLOTS:
-    void settingsWindowRequested(IInstance*);
-    void openHelp(IInstance *);
-    void instanceClosing(IInstance *);
-    void instanceDestroyed(QObject*);
-    void instanceRunCode(IInstance *);
-    void instanceStopCode(IInstance *);
-    void instanceChangedSetting(IInstance *, const QString &key, const QVariant &value);
-    void instanceRequestSetting(IInstance *, const QString &key, QVariant &value);
-    void instanceChangedSettings(IInstance *, const QHash<QString, QVariant> &);
-    void instanceRequestSettings(IInstance *, QHash<QString, QVariant> &);
-    void instanceLoadModel(IInstance*, const QString &, const QVector3D &, const QVector3D &, const QVector3D &);
+    void settingsWindowRequested(IInstance*) noexcept;
+    void openHelp(IInstance *) noexcept;
+    void instanceClosing(IInstance *) noexcept;
+    void instanceDestroyed(QObject*) noexcept;
+    void instanceRunCode(IInstance *) noexcept;
+    void instanceStopCode(IInstance *) noexcept;
+    void instanceChangedSetting(IInstance *, const QString &key, const QVariant &value) noexcept;
+    void instanceRequestSetting(IInstance *, const QString &key, QVariant &value) noexcept;
+    void instanceChangedSettings(IInstance *, const QHash<QString, QVariant> &) noexcept;
+    void instanceRequestSettings(IInstance *, QHash<QString, QVariant> &) noexcept;
+    void instanceLoadModel(IInstance*, const QString &, const QVector3D &, const QVector3D &, const QVector3D &) noexcept;
 //    void instanceRemoveID(IInstance *instance);
-    void childSaidCloseAll();
-    void getExecutionResults(GlLiveThread*, QString);
+    void childSaidCloseAll() noexcept;
+    void getExecutionResults(GlLiveThread*, QString) noexcept;
 
-    void getError(GlLiveThread*, QString, int);
+    void getError(GlLiveThread*, QString, int) noexcept;
 
 private:
-    void runGlFile(IInstance *);
-    void terminateThread(long id);
+    void runGlFile(IInstance *) noexcept;
+    void terminateThread(long id) noexcept;
+    void saveIDs() noexcept;
     QList<int> ids;
     QHash<long, std::shared_ptr<IInstance>> instances;
     QHash<long, std::shared_ptr<LiveThread>> threads;
-    void saveIDs();
 };
 
 #endif // BACKEND_HPP

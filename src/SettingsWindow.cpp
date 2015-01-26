@@ -62,7 +62,7 @@ SettingsWindow::~SettingsWindow(){
  *
  * applies the changes made in the window.
  */
-void SettingsWindow::apply(){
+void SettingsWindow::apply() noexcept{
     if(changed){
         QApplication::setStyle(settingsDict["Design"].toString());
         repaint();
@@ -85,7 +85,7 @@ void SettingsWindow::apply(){
  *
  * calls apply() and close(), thus saving the changes and exiting the window.
  */
-void SettingsWindow::applyClose(){
+void SettingsWindow::applyClose() noexcept{
     apply();
     close();
 }
@@ -96,7 +96,7 @@ void SettingsWindow::applyClose(){
  * if there are unsaved changes, this method will create a checkbox
  * asking the user whether he/she wants to quit. Otherwise, it will just exit.
  */
-void SettingsWindow::tryClose(){
+void SettingsWindow::tryClose() noexcept{
     if(changed){
         QMessageBox::StandardButton question;
         question = QMessageBox::warning(this, tr("VeToLC"),
@@ -119,6 +119,6 @@ void SettingsWindow::tryClose(){
  * setter for the changed flag. Sets the flag to true.
  * This will result in the apply function having effect.
  */
-void SettingsWindow::changedTrue(){
+void SettingsWindow::changedTrue() noexcept{
     changed = true;
 }

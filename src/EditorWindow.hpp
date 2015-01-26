@@ -29,29 +29,29 @@ class EditorWindow : public QMainWindow{
 public:
     EditorWindow(const QHash<QString, QVariant> &settings, QWidget *parent = 0);
     ~EditorWindow();
-    void showResults(const QString &);
-    void warningDisplay(const QString &);
-    void highlightErroredLine(int);
-    void codeStopped();
+    void showResults(const QString &) noexcept;
+    void warningDisplay(const QString &) noexcept;
+    void highlightErroredLine(int) noexcept;
+    void codeStopped() noexcept;
 
-    QString getVertexSourceCode() const;
-    QString getFragmentSourceCode() const;
-    QString getTitle() const;
+    QString getVertexSourceCode() const noexcept;
+    QString getFragmentSourceCode() const noexcept;
+    QString getTitle() const noexcept;
 
 protected:
-    virtual void closeEvent(QCloseEvent *);
+    virtual void closeEvent(QCloseEvent *) noexcept;
 
 private Q_SLOTS:
-    void newFile();
-    void openFile();
+    void newFile() noexcept;
+    void openFile() noexcept;
 
-    void docModified();
-    void runFile();
-    bool saveFile();
+    void docModified() noexcept;
+    void runFile() noexcept;
+    bool saveFile() noexcept;
 
-    void gotOpenHelp();
-    void gotOpenSettings();
-    void gotCloseAll();
+    void gotOpenHelp() noexcept;
+    void gotOpenSettings() noexcept;
+    void gotCloseAll() noexcept;
 
 Q_SIGNALS:
     void closing(EditorWindow *);
@@ -66,20 +66,20 @@ Q_SIGNALS:
     void loadModel(const QString &, const QVector3D &, const QVector3D &, const QVector3D &);
 
 private:
-    EditorWindow& operator=(const EditorWindow& rhs);
-    EditorWindow& operator=(EditorWindow&& rhs);
+    EditorWindow& operator=(const EditorWindow& rhs) noexcept;
+    EditorWindow& operator=(EditorWindow&& rhs) noexcept;
 
-    void addActions();
-    void addMenus();
-    void addToolBars();
-    void addStatusBar();
-    void applySettings(const QHash<QString, QVariant> &);
-    void loadFile(const QString &, bool v = false, bool f = false);
-    bool saveDialog();
-    bool saveFile(QString shaderType);
-    void saveSettings();
-    void setAsCurrentFile(const QString &vertexFile, const QString &fragmentFile);
-    QString stripName(const QString &);
+    void addActions() noexcept;
+    void addMenus() noexcept;
+    void addToolBars() noexcept;
+    void addStatusBar() noexcept;
+    void applySettings(const QHash<QString, QVariant> &) noexcept;
+    void loadFile(const QString &, bool v = false, bool f = false) noexcept;
+    bool saveDialog() noexcept;
+    bool saveFile(QString shaderType) noexcept;
+    void saveSettings() noexcept;
+    void setAsCurrentFile(const QString &vertexFile, const QString &fragmentFile) noexcept;
+    QString stripName(const QString &) noexcept;
 
     int templateNum;
 

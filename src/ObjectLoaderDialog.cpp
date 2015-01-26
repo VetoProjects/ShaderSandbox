@@ -5,7 +5,7 @@ ObjectLoaderDialog::ObjectLoaderDialog(QDialog* parent) : QDialog(parent){
     setupLayout();
 }
 
-void ObjectLoaderDialog::setupLayout(){
+void ObjectLoaderDialog::setupLayout() noexcept{
     QPushButton* closeBut = new QPushButton(tr("Cancel"));
     QPushButton* loadBut = new QPushButton(tr("Load Object"));
     connect(loadBut, SIGNAL(clicked()), this, SLOT(load()));
@@ -30,7 +30,7 @@ void ObjectLoaderDialog::setupLayout(){
     setWindowTitle(tr("ShaderSandbox | Load an Object"));
 }
 
-void ObjectLoaderDialog::setupCoordinateBoxes(){
+void ObjectLoaderDialog::setupCoordinateBoxes() noexcept{
     offsetBoxX = new QDoubleSpinBox();
     offsetBoxX->setMinimum(-1000);
     offsetBoxX->setMaximum(1000);
@@ -69,19 +69,19 @@ void ObjectLoaderDialog::setupCoordinateBoxes(){
     rotationBoxZ->setDecimals(4);
 }
 
-void ObjectLoaderDialog::setupFileChooser(){
+void ObjectLoaderDialog::setupFileChooser() noexcept{
     fileNameBox = new QLineEdit("");
     fileChoosingButton = new QPushButton(tr("Select File..."));
 
     connect(fileChoosingButton, SIGNAL(clicked()), this, SLOT(selectFile()));
 }
 
-void ObjectLoaderDialog::selectFile(){
+void ObjectLoaderDialog::selectFile() noexcept{
     QString filename = QFileDialog::getOpenFileName(this);
     if(filename != "") fileNameBox->setText(filename);
 }
 
-QVBoxLayout* ObjectLoaderDialog::setupLoaderLayout(){
+QVBoxLayout* ObjectLoaderDialog::setupLoaderLayout() noexcept{
     QHBoxLayout* fileLayout = new QHBoxLayout();
 
     fileLayout->addWidget(fileNameBox);
@@ -135,7 +135,7 @@ QVBoxLayout* ObjectLoaderDialog::setupLoaderLayout(){
 }
 
 void ObjectLoaderDialog::setData(const QString &modelFile, const QVector3D &modelOffset,
-                                 const QVector3D &modelScaling, const QVector3D &modelRotation){
+                                 const QVector3D &modelScaling, const QVector3D &modelRotation) noexcept{
     fileNameBox->setText(modelFile);
     offsetBoxX->setValue(modelOffset.x());
     offsetBoxY->setValue(modelOffset.y());
@@ -148,7 +148,7 @@ void ObjectLoaderDialog::setData(const QString &modelFile, const QVector3D &mode
     rotationBoxZ->setValue(modelRotation.z());
 }
 
-void ObjectLoaderDialog::load(){
+void ObjectLoaderDialog::load() noexcept{
     QString objectFile = fileNameBox->text();
     if(objectFile.isEmpty()){
         QMessageBox::warning(this, tr("ShaderSandbox"), "File name cannot be empty.");
@@ -164,12 +164,11 @@ void ObjectLoaderDialog::load(){
               objectScaling(scalingBoxX->value(), scalingBoxY->value(), scalingBoxZ->value()),
               objectRotation(rotationBoxX->value(), rotationBoxY->value(), rotationBoxZ->value());
 
-    qDebug() << objectFile << objectOffset << objectScaling << objectRotation;
     Q_EMIT objectInfo(objectFile, objectOffset, objectScaling, objectRotation);
     close();
 }
 
-void ObjectLoaderDialog::keyPressEvent(QKeyEvent *evt){
+void ObjectLoaderDialog::keyPressEvent(QKeyEvent *evt) noexcept{
     if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
         return;
     QDialog::keyPressEvent(evt);

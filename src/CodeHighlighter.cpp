@@ -22,7 +22,7 @@ CodeHighlighter::CodeHighlighter(QTextDocument *parent) : QSyntaxHighlighter(par
  * TODO: Build quot-pairs ( "bla " bla " bla " -> all is highlighted)
  * TODO: don't let the multi line comment trust preview format (see function highlightBlock(...) )
  */
-void CodeHighlighter::setupHighlighting(){
+void CodeHighlighter::setupHighlighting() noexcept{
     QFile highlighting;
     highlighting.setFileName(":/rc/highlighting/glsl");
     highlighting.open(QFile::ReadOnly | QFile::Text);
@@ -107,7 +107,7 @@ void CodeHighlighter::setupHighlighting(){
  * TODO: Code and time complexity are suboptimal.
  *       Is there a better way?
  */
-void CodeHighlighter::highlightBlock(const QString &text){
+void CodeHighlighter::highlightBlock(const QString &text) noexcept{
     /*
      * goes through the text once for each rule and
      * highlights the code according to those

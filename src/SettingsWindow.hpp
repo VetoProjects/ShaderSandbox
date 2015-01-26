@@ -22,13 +22,13 @@ public:
     ~SettingsWindow();
 
 private Q_SLOTS:
-   void apply();
-   void applyClose();
-   void tryClose();
-   void changedTrue();
+   void apply() noexcept;
+   void applyClose() noexcept;
+   void tryClose() noexcept;
+   void changedTrue() noexcept;
 
 private:
-    void addButtons();
+    void addButtons() noexcept;
 
     bool changed;
     QTabWidget *tabs;

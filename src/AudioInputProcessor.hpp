@@ -12,8 +12,8 @@ class AudioInputProcessor : public QIODevice
     Q_OBJECT
 public:
     explicit AudioInputProcessor(QObject *parent = 0);
-    void start();
-    const QAudioFormat format() const;
+    void start() noexcept;
+    const QAudioFormat format() const noexcept;
 
 Q_SIGNALS:
     void processData(QByteArray);
@@ -27,8 +27,8 @@ private:
 
     // QIODevice interface
 protected:
-    virtual qint64 readData(char *data, qint64 maxlen);
-    virtual qint64 writeData(const char *data, qint64 len);
+    virtual qint64 readData(char *data, qint64 maxlen) noexcept;
+    virtual qint64 writeData(const char *data, qint64 len) noexcept;
 };
 
 #endif // AUDIOINPUTPROCESSOR_HPP

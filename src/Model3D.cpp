@@ -21,7 +21,7 @@ Model3D::~Model3D(){
     delete vao;
 }
 
-bool Model3D::init(){
+bool Model3D::init() noexcept{
     initializeOpenGLFunctions();
     vao = new QOpenGLVertexArrayObject();
     vao->create();
@@ -33,7 +33,7 @@ bool Model3D::init(){
     return true;
 }
 
-bool Model3D::loadModel(const std::string &path, bool smooth){
+bool Model3D::loadModel(const std::string &path, bool smooth) noexcept{
 //    cout << "Loading model: " << path << endl;
     ifstream file(path);
     if(!file){
@@ -173,7 +173,8 @@ bool Model3D::loadModel(const std::string &path, bool smooth){
     return true;
 }
 
-void Model3D::pushData(const std::vector<GLfloat> &vertices, const std::vector<GLfloat> &uvs, const std::vector<GLfloat> &normals, const std::vector<GLuint> &vertexIndices){
+void Model3D::pushData(const std::vector<GLfloat> &vertices, const std::vector<GLfloat> &uvs,
+                       const std::vector<GLfloat> &normals, const std::vector<GLuint> &vertexIndices) noexcept{
     vertexCount = vertices.size();
 
     vao->bind();
@@ -202,7 +203,7 @@ void Model3D::pushData(const std::vector<GLfloat> &vertices, const std::vector<G
     vao->release();
 }
 
-void Model3D::draw(){
+void Model3D::draw() noexcept{
     if(!vao)
         return;
 

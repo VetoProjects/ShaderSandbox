@@ -35,13 +35,13 @@ public:
         if(runObj)
             delete runObj;
     }
-    void run() Q_DECL_OVERRIDE{
+    void run()  noexcept Q_DECL_OVERRIDE{
         if(runObj)
             runObj->show();
         exec();
     }
     // No parent object =(
-    void initialize(const QString &vertexShader, const QString &fragmentShader){
+    void initialize(const QString &vertexShader, const QString &fragmentShader) noexcept{
         runObj = new Renderer(vertexShader, fragmentShader);
         connect(runObj, SIGNAL(doneSignal(QString)), this, SLOT(doneSignalReceived(QString)));
         connect(runObj, SIGNAL(errored(QString,int)), this, SLOT(erroredReceived(QString, int)));
@@ -49,18 +49,18 @@ public:
         runObj->resize(800, 600);
         runObj->show();
     }
-    bool updateCode(const QString &vertexShader, const QString &fragmentShader){
+    bool updateCode(const QString &vertexShader, const QString &fragmentShader) noexcept{
         return runObj && runObj->updateCode(vertexShader, fragmentShader);
     }
-    bool loadModel(const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation){
+    bool loadModel(const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation) noexcept{
         return runObj && runObj->loadModel(file, offset, scaling, rotation);
     }
 
 public Q_SLOTS:
-    void doneSignalReceived(QString exception){
+    void doneSignalReceived(QString exception) noexcept{
         Q_EMIT doneSignal(this, exception);
     }
-    void erroredReceived(QString error, int lineno){
+    void erroredReceived(QString error, int lineno) noexcept{
         Q_EMIT errorSignal(this, error, lineno);
     }
 Q_SIGNALS:

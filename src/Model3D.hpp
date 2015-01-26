@@ -15,12 +15,13 @@ public:
     Model3D();
     ~Model3D();
 
-    bool init();
-    bool loadModel(const std::string &path, bool smooth = true);
-    void draw();
+    bool init() noexcept;
+    bool loadModel(const std::string &path, bool smooth = true) noexcept;
+    void draw() noexcept;
 
 private:
-    void pushData(const std::vector<float> &vertices, const std::vector<float> &uvs, const std::vector<float> &normals, const std::vector<unsigned> &vertexIndices);
+    void pushData(const std::vector<float> &vertices, const std::vector<float> &uvs,
+                  const std::vector<float> &normals, const std::vector<unsigned> &vertexIndices) noexcept;
     QOpenGLVertexArrayObject *vao;
     GLuint
         indexSize,

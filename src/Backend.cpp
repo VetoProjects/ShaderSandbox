@@ -43,7 +43,7 @@ Backend::~Backend(){
  * enlists the child and creates an empty thread entry
  * in the list so that the two correlate.
  */
-void Backend::addInstance(IInstance *instance, bool removeSettings){
+void Backend::addInstance(IInstance *instance, bool removeSettings) noexcept{
     int id = instance->ID;
     if(instances.contains(id))
         return;
@@ -72,7 +72,7 @@ void Backend::addInstance(IInstance *instance, bool removeSettings){
  *
  * Look up the first free ID for a new Instance.
  */
-int Backend::nextID(){
+int Backend::nextID() noexcept{
     int id = 0;
     while(ids.contains(id))
         ++id;
@@ -86,7 +86,7 @@ int Backend::nextID(){
  * Return the list of ids for which settings
  * should exist.
  */
-QList<int> Backend::loadIds()
+QList<int> Backend::loadIds() noexcept
 {
     QVariantList ids = SettingsBackend::getSettingsFor(QStringLiteral("Instances"), QVariantList()).toList();
     QList<int> res;
@@ -107,7 +107,7 @@ QList<int> Backend::loadIds()
  * removeInstance() routine.
  * TODO: Needed?
  */
-void Backend::instanceClosing(IInstance *instance)
+void Backend::instanceClosing(IInstance *instance) noexcept
 {
     removeInstance(instance);
 }
@@ -119,7 +119,7 @@ void Backend::instanceClosing(IInstance *instance)
  * Reacts to the destroyed signal and removes
  * the instance from the backends' memory.
  */
-void Backend::instanceDestroyed(QObject *instance)
+void Backend::instanceDestroyed(QObject *instance) noexcept
 {
     int id = ((IInstance*)instance)->ID;
     instances.remove(id);
@@ -138,11 +138,11 @@ void Backend::instanceDestroyed(QObject *instance)
  *      killed child. This will result in confusion of the user.
  * TODO: Fix bug!
  */
-bool Backend::removeInstance(Instances::IInstance *instance, bool removeSettings){
+bool Backend::removeInstance(Instances::IInstance *instance, bool removeSettings) noexcept{
     return removeInstance(instance->ID, removeSettings);
 }
 
-bool Backend::removeInstance(int id, bool removeSettings){
+bool Backend::removeInstance(int id, bool removeSettings) noexcept{
     if(instances.contains(id)){
         disconnect(instances[id].get(), &IInstance::destroyed, this, &Backend::instanceDestroyed);
         if(!instances[id]->close()){
@@ -168,7 +168,7 @@ bool Backend::removeInstance(int id, bool removeSettings){
  * when a user requests to exit the application, this
  * will tell all the children to terminate.
  */
-void Backend::childSaidCloseAll(){
+void Backend::childSaidCloseAll() noexcept{
     QList<int> notRemoved = ids;
     for(auto id : ids){
         disconnect(instances[id].get(), &IInstance::destroyed, this, &Backend::instanceDestroyed);
@@ -193,7 +193,7 @@ void Backend::childSaidCloseAll(){
  * when the child reacts to the closedAction, it is removed
  * from the list.
  */
-void Backend::childExited(IInstance *child, QString file){
+void Backend::childExited(IInstance *child, QString file) noexcept{
     Q_UNUSED(child);
     Q_UNUSED(file);
 //    saveSettings(child, file);
@@ -207,7 +207,7 @@ void Backend::childExited(IInstance *child, QString file){
  *
  * Gets all settings for a specific window.
  */
-QHash<QString, QVariant> Backend::getSettings(IInstance* instance)
+QHash<QString, QVariant> Backend::getSettings(IInstance* instance) noexcept
 {
     return getSettings(instance->ID);
 }
@@ -219,7 +219,7 @@ QHash<QString, QVariant> Backend::getSettings(IInstance* instance)
  *
  * looks up the settings for an editor window child.
  */
-QHash<QString, QVariant> Backend::getSettings(int id)
+QHash<QString, QVariant> Backend::getSettings(int id) noexcept
 {
     return SettingsBackend::getSettings(id);
 }
@@ -230,7 +230,7 @@ QHash<QString, QVariant> Backend::getSettings(int id)
  *
  * Creates a settings window instance.
  */
-void Backend::settingsWindowRequested(IInstance *instance){
+void Backend::settingsWindowRequested(IInstance *instance) noexcept{
     SettingsWindow settingsWin(instance->ID);
     settingsWin.exec();
 }
@@ -240,7 +240,7 @@ void Backend::settingsWindowRequested(IInstance *instance){
  *
  * Opens a help window in HTML.
  */
-void Backend::openHelp(IInstance *){
+void Backend::openHelp(IInstance *) noexcept{
     QUrl url(directoryOf("rc").absoluteFilePath("help.html"));
     url.setScheme("file");
     QDesktopServices::openUrl(url);
@@ -253,7 +253,7 @@ void Backend::openHelp(IInstance *){
  *
  * Platform independent wrapper to changing the directory.
  */
-QDir Backend::directoryOf(const QString &subdir){
+QDir Backend::directoryOf(const QString &subdir) noexcept{
     QDir dir(QApplication::applicationDirPath());
 
 #if defined(Q_OS_MAC)
@@ -275,11 +275,11 @@ QDir Backend::directoryOf(const QString &subdir){
  *
  * removes the settings for a specific file.
  */
-void Backend::removeSettings(IInstance* instance){
+void Backend::removeSettings(IInstance* instance) noexcept{
     SettingsBackend::removeSettings(instance->ID);
 }
 
-void Backend::removeSettings(int id){
+void Backend::removeSettings(int id) noexcept{
     SettingsBackend::removeSettings(id);
 }
 
@@ -289,7 +289,7 @@ void Backend::removeSettings(int id){
  *
  * checks whether there is only one or no child in the list.
  */
-bool Backend::isLast(){
+bool Backend::isLast() noexcept{
     return ids.length() < 2;
 }
 
@@ -299,7 +299,7 @@ bool Backend::isLast(){
  * reacts to the run SIGNAL by running the code(duh) that is
  * in the editor at the moment.
  */
-void Backend::instanceRunCode(IInstance *instance)
+void Backend::instanceRunCode(IInstance *instance) noexcept
 {
     long id = instance->ID;
     if(threads.contains(id)){
@@ -319,7 +319,7 @@ void Backend::instanceRunCode(IInstance *instance)
  * Reacts to the stopCode signal of an instance.
  * Stops the executing context.
  */
-void Backend::instanceStopCode(IInstance *instance)
+void Backend::instanceStopCode(IInstance *instance) noexcept
 {
     terminateThread(instance->ID);
 }
@@ -333,7 +333,8 @@ void Backend::instanceStopCode(IInstance *instance)
  * Reacts to the instance changing settings.
  * Saves the new settings.
  */
-void Backend::instanceChangedSetting(IInstance *instance, const QString &key, const QVariant &value)
+void Backend::instanceChangedSetting(IInstance *instance, const QString &key,
+                                     const QVariant &value) noexcept
 {
     SettingsBackend::saveSettingsFor(instance->ID, key, value);
 }
@@ -347,12 +348,13 @@ void Backend::instanceChangedSetting(IInstance *instance, const QString &key, co
  * Reacts to the instance requesting its settings for
  * a given key.
  */
-void Backend::instanceRequestSetting(IInstance *instance, const QString &key, QVariant &value)
+void Backend::instanceRequestSetting(IInstance *instance, const QString &key,
+                                     QVariant &value) noexcept
 {
     value = SettingsBackend::getSettingsFor(key, value, instance->ID);
 }
 
-QVariant Backend::getSetting(QString key, QVariant defaultValue){
+QVariant Backend::getSetting(QString key, QVariant defaultValue) noexcept{
     return SettingsBackend::getSettingsFor(key, defaultValue);
 }
 
@@ -365,7 +367,8 @@ QVariant Backend::getSetting(QString key, QVariant defaultValue){
  * Saves the new settings.
  * TODO: Needed(overloaded call)?
  */
-void Backend::instanceChangedSettings(IInstance *instance, const QHash<QString, QVariant> &set)
+void Backend::instanceChangedSettings(IInstance *instance, const QHash<QString,
+                                      QVariant> &set) noexcept
 {
     SettingsBackend::saveSettingsFor(instance->ID, set);
 }
@@ -377,7 +380,8 @@ void Backend::instanceChangedSettings(IInstance *instance, const QHash<QString, 
  *
  * TODO: Needed(overloaded call)?
  */
-void Backend::instanceRequestSettings(IInstance *instance, QHash<QString, QVariant> &set)
+void Backend::instanceRequestSettings(IInstance *instance, QHash<QString,
+                                      QVariant> &set) noexcept
 {
     set = SettingsBackend::getSettings(instance->ID);
 }
@@ -392,7 +396,8 @@ void Backend::instanceRequestSettings(IInstance *instance, QHash<QString, QVaria
  *
  * Triggers the renderer to load a model
  */
-void Backend::instanceLoadModel(IInstance *instance, const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation)
+void Backend::instanceLoadModel(IInstance *instance, const QString &file, const QVector3D &offset,
+                                const QVector3D &scaling, const QVector3D &rotation) noexcept
 {
     if(threads.contains(instance->ID))
         threads[instance->ID]->loadModel(file, offset, scaling, rotation);
@@ -406,7 +411,7 @@ void Backend::instanceLoadModel(IInstance *instance, const QString &file, const 
  *
  * Creates a thread that executes GL source code.
  */
-void Backend::runGlFile(IInstance *instance){
+void Backend::runGlFile(IInstance *instance) noexcept{
     std::shared_ptr<GlLiveThread> thread(new GlLiveThread(instance->ID, this));
     connect(thread.get(), &GlLiveThread::doneSignal,  this, &Backend::getExecutionResults);
     connect(thread.get(), &GlLiveThread::errorSignal, this, &Backend::getError);
@@ -421,14 +426,14 @@ void Backend::runGlFile(IInstance *instance){
  * reacts to the done SIGNAL by terminating the thread and
  * emitting a showResults SIGNAL for the QWidgets to display
  */
-void Backend::getExecutionResults(GlLiveThread* thread, QString returnedException){
+void Backend::getExecutionResults(GlLiveThread* thread, QString returnedException) noexcept{
     // Already gone?
     disconnect(thread, &GlLiveThread::doneSignal, this, &Backend::getExecutionResults);
     instances[thread->ID]->reportWarning(returnedException);
     terminateThread(thread->ID);
 }
 
-void Backend::getError(GlLiveThread* thread, QString error, int lineno){
+void Backend::getError(GlLiveThread* thread, QString error, int lineno) noexcept{
     instances[thread->ID]->reportWarning(error);
     if(lineno >= 0)
         instances[thread->ID]->highlightErroredLine(lineno);
@@ -440,7 +445,7 @@ void Backend::getError(GlLiveThread* thread, QString error, int lineno){
  *
  * terminates a specific thread and deletes it from the list.
  */
-void Backend::terminateThread(long id){
+void Backend::terminateThread(long id) noexcept{
     if(threads.contains(id)){
         if(threads[id]->isRunning())
             threads[id]->terminate();
@@ -456,7 +461,7 @@ void Backend::terminateThread(long id){
  *
  * saves all the IDs in the settings.
  */
-void Backend::saveIDs(){
+void Backend::saveIDs() noexcept{
     QVariantList vids;
     for(auto i : ids)
         vids.append(i);

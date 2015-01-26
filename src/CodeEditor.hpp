@@ -22,19 +22,19 @@ class CodeEditor : public QPlainTextEdit{
 
 public:
     CodeEditor(QWidget *parent = 0);
-    void lineHighlightingPaintEvent(QPaintEvent *event);
-    int lineHighlightingWidth();
-    void highlightErroredLine(int);
-    void setHighlighting(int highlighting);
+    void lineHighlightingPaintEvent(QPaintEvent *event) noexcept;
+    int lineHighlightingWidth() noexcept;
+    void highlightErroredLine(int) noexcept;
+    void setHighlighting(int highlighting) noexcept;
 
 protected:
-    void resizeEvent(QResizeEvent *event);
-    void keyPressEvent(QKeyEvent *e);
+    void resizeEvent(QResizeEvent *event) noexcept;
+    void keyPressEvent(QKeyEvent *e) noexcept;
 
 private Q_SLOTS:
-    void updatelineHighlightingWidth();
-    void highlightCurrentLine();
-    void updatelineHighlighting(const QRect &, int);
+    void updatelineHighlightingWidth() noexcept;
+    void highlightCurrentLine() noexcept;
+    void updatelineHighlighting(const QRect &, int) noexcept;
 
 private:
     QWidget *lineHighlighting;
@@ -56,12 +56,12 @@ public:
         codeEditor = editor;
     }
 
-    virtual QSize sizeHint() const{
+    virtual QSize sizeHint() const noexcept{
         return QSize(codeEditor->lineHighlightingWidth(), 0);
     }
 
  protected:
-    virtual void paintEvent(QPaintEvent *event) {
+    virtual void paintEvent(QPaintEvent *event) noexcept{
         codeEditor->lineHighlightingPaintEvent(event);
     }
 

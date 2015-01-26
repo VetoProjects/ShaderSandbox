@@ -32,25 +32,25 @@ AudioInputProcessor::AudioInputProcessor(QObject *parent) :
     input = std::unique_ptr<QAudioInput>(new QAudioInput(inputDevice, format, this));
 }
 
-void AudioInputProcessor::start()
+void AudioInputProcessor::start() noexcept
 {
     this->open(QIODevice::WriteOnly);
     input->start(this);
 }
 
-const QAudioFormat AudioInputProcessor::format() const
+const QAudioFormat AudioInputProcessor::format() const noexcept
 {
     return input->format();
 }
 
-qint64 AudioInputProcessor::readData(char *data, qint64 maxlen)
+qint64 AudioInputProcessor::readData(char *data, qint64 maxlen) noexcept
 {
     Q_UNUSED(data);
     Q_UNUSED(maxlen);
     return 0;
 }
 
-qint64 AudioInputProcessor::writeData(const char *data, qint64 len)
+qint64 AudioInputProcessor::writeData(const char *data, qint64 len) noexcept
 {
 //    int bufSize = input->bufferSize() / 5;
 //    if(len < bufSize)

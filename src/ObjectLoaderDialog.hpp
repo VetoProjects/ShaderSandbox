@@ -28,23 +28,23 @@ Q_OBJECT
 public:
     ObjectLoaderDialog(QDialog* parent = 0);
     void setData(const QString &modelFile, const QVector3D &modelOffset,
-                 const QVector3D &modelScaling, const QVector3D &modelRotation);
+                 const QVector3D &modelScaling, const QVector3D &modelRotation) noexcept;
 
 public Q_SLOTS:
-    void keyPressEvent(QKeyEvent*);
+    void keyPressEvent(QKeyEvent*) noexcept;
 
 private Q_SLOTS:
-    void load();
-    void selectFile();
+    void load() noexcept;
+    void selectFile() noexcept;
 
 Q_SIGNALS:
-    void objectInfo(const QString&, const QVector3D &, const QVector3D &, const QVector3D &);
+    void objectInfo(const QString&, const QVector3D &, const QVector3D &, const QVector3D &) noexcept;
 
 private:
-    void setupLayout();
-    void setupCoordinateBoxes();
-    void setupFileChooser();
-    QVBoxLayout* setupLoaderLayout();
+    void setupLayout() noexcept;
+    void setupCoordinateBoxes() noexcept;
+    void setupFileChooser() noexcept;
+    QVBoxLayout* setupLoaderLayout() noexcept;
 
     QLineEdit* fileNameBox;
     QPushButton* fileChoosingButton;

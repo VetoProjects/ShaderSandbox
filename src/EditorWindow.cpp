@@ -88,7 +88,7 @@ EditorWindow::~EditorWindow(){
  * reacts to the close signal; saves the current preferences
  * if wanted and exits(SLOT).
  */
-void EditorWindow::closeEvent(QCloseEvent *event){
+void EditorWindow::closeEvent(QCloseEvent *event) noexcept{
     if(saveDialog()){
         saveSettings();
         Q_EMIT closing(this);
@@ -97,12 +97,12 @@ void EditorWindow::closeEvent(QCloseEvent *event){
         event->ignore();
 }
 
-void EditorWindow::gotOpenHelp()
+void EditorWindow::gotOpenHelp() noexcept
 {
     Q_EMIT openHelp(this);
 }
 
-void EditorWindow::gotCloseAll()
+void EditorWindow::gotCloseAll() noexcept
 {
     Q_EMIT closeAll(this);
 }
@@ -112,7 +112,7 @@ void EditorWindow::gotCloseAll()
  *
  * opens a new, empty file in the editor(SLOT).
  */
-void EditorWindow::newFile(){
+void EditorWindow::newFile() noexcept{
     QStringList editor;
     bool ok;
     editor << "Both" << "VertexShader" << "FragmentShader";
@@ -161,7 +161,7 @@ void EditorWindow::newFile(){
  * Opens a file choosing dialog and opens
  * the requested file(SLOT).
  */
-void EditorWindow::openFile(){
+void EditorWindow::openFile() noexcept{
     if(saveDialog()){
         QString fileName = QFileDialog::getOpenFileName(this);
         if (!fileName.isEmpty())
@@ -174,7 +174,7 @@ void EditorWindow::openFile(){
  *
  * saves own settings.
  */
-void EditorWindow::saveSettings(){
+void EditorWindow::saveSettings() noexcept{
     QHash<QString, QVariant> settings;
     settings.insert("pos", this->pos());
     settings.insert("size", this->size());
@@ -201,7 +201,7 @@ void EditorWindow::saveSettings(){
  *
  * creates an instance of SettingsWindow and executes it.
  */
-void EditorWindow::gotOpenSettings(){
+void EditorWindow::gotOpenSettings() noexcept{
     Q_EMIT openSettings(this);
 }
 
@@ -212,7 +212,7 @@ void EditorWindow::gotOpenSettings(){
  * window properties to modified/not modified( as shown by
  * the little * at the top of the window beside the name).
  */
-void EditorWindow::docModified(){
+void EditorWindow::docModified() noexcept{
     setWindowModified(vertexCodeEditor->document()->isModified() || fragmentCodeEditor->document()->isModified());
 }
 
@@ -222,7 +222,7 @@ void EditorWindow::docModified(){
  *
  * Displays a warning box containing message.
  */
-void EditorWindow::warningDisplay(const QString &message){
+void EditorWindow::warningDisplay(const QString &message) noexcept{
     QMessageBox::warning(this, tr("VeToLC"), message);
 }
 
@@ -231,7 +231,7 @@ void EditorWindow::warningDisplay(const QString &message){
  *
  * Sets the icon back to normal.
  */
-void EditorWindow::codeStopped()
+void EditorWindow::codeStopped() noexcept
 {
     runAction->setIcon(QIcon(":/images/run.png"));
 }
@@ -243,7 +243,7 @@ void EditorWindow::codeStopped()
  * Highlights a given line in red. Signifies an error in
  * that line.
  */
-void EditorWindow::highlightErroredLine(int lineno){
+void EditorWindow::highlightErroredLine(int lineno) noexcept{
     vertexCodeEditor->highlightErroredLine(lineno);
     // TODO: filter fragment-shader-errors
 }
@@ -254,7 +254,7 @@ void EditorWindow::highlightErroredLine(int lineno){
  * Reads the "persistent platform-independent
  * application settings" and gets the settings.
  */
-void EditorWindow::applySettings(const QHash<QString, QVariant> &settings){
+void EditorWindow::applySettings(const QHash<QString, QVariant> &settings) noexcept{
     if(settings.value("RememberSize").toBool()){
         const QPoint  pos  = settings.value("pos", QPoint(0, 0)).toPoint();
         const QSize   size = settings.value("size", QSize(800, 600)).toSize();
@@ -285,7 +285,7 @@ void EditorWindow::applySettings(const QHash<QString, QVariant> &settings){
  *
  * lets the backend run the file.
  */
-void EditorWindow::runFile(){
+void EditorWindow::runFile() noexcept{
     runAction->setIcon(QIcon(":/images/refresh.png"));
     Q_EMIT runCode(this);
     Q_EMIT loadModel(modelFile, modelOffset, modelScaling, modelRotation);
@@ -298,7 +298,7 @@ void EditorWindow::runFile(){
  * Is called after the execution of the interpreter thread has finished.
  * Shows its return code or an exception traceback.
  */
-void EditorWindow::showResults(const QString &returnedValue){
+void EditorWindow::showResults(const QString &returnedValue) noexcept{
     statusBar()->showMessage(returnedValue, 5000);
     runAction->setIcon(QIcon(":/images/run.png"));
 }
@@ -309,11 +309,11 @@ void EditorWindow::showResults(const QString &returnedValue){
  *
  * returns code in editor.
  */
-QString EditorWindow::getVertexSourceCode() const{
+QString EditorWindow::getVertexSourceCode() const noexcept{
     return vertexCodeEditor->toPlainText();
 }
 
-QString EditorWindow::getFragmentSourceCode() const
+QString EditorWindow::getFragmentSourceCode() const noexcept
 {
     return fragmentCodeEditor->toPlainText();
 }
@@ -324,7 +324,7 @@ QString EditorWindow::getFragmentSourceCode() const
  *
  * returns current file name.
  */
-QString EditorWindow::getTitle() const{
+QString EditorWindow::getTitle() const noexcept{
     return currentVertexFile + " | " + currentFragmentFile;
 }
 
@@ -333,7 +333,7 @@ QString EditorWindow::getTitle() const{
  *
  * adds signals(buttons, shortcuts) to the window.
  */
-void EditorWindow::addActions(){
+void EditorWindow::addActions() noexcept{
     newAction = new QAction(QIcon(":/images/new.png"), tr("&New File"), this);
     newAction->setShortcuts(QKeySequence::New);
     newAction->setStatusTip(tr("Create a new file"));
@@ -380,7 +380,7 @@ void EditorWindow::addActions(){
  * adds the menus to the window(duh!) and fills them
  * with the corresponding actions.
  */
-void EditorWindow::addMenus(){
+void EditorWindow::addMenus() noexcept{
     fMenu = menuBar()->addMenu(tr("&File"));
     fMenu->addAction(newAction);
     fMenu->addAction(openAction);
@@ -403,7 +403,7 @@ void EditorWindow::addMenus(){
  * adds the toolbars to the window(duh!) and fills them
  * with the corresponding actions.
  */
-void EditorWindow::addToolBars(){
+void EditorWindow::addToolBars() noexcept{
     fileBar = addToolBar(tr("File"));
     fileBar->addAction(newAction);
     fileBar->addAction(openAction);
@@ -421,7 +421,7 @@ void EditorWindow::addToolBars(){
  * Adds a status bar to the window(duh!) and shows a
  * message in it displaying it is ready to use.
  */
-void EditorWindow::addStatusBar(){
+void EditorWindow::addStatusBar() noexcept{
     statusBar()->showMessage(tr("Ready"));
 }
 
@@ -434,7 +434,7 @@ void EditorWindow::addStatusBar(){
  * Opens a dialog asking the user if he wants to save the changes.
  * Invoked when he exits the application/the current file unchanged.
  */
-bool EditorWindow::saveDialog(){
+bool EditorWindow::saveDialog() noexcept{
     if(vertexCodeEditor->document()->isModified() || fragmentCodeEditor->document()->isModified()){
         QMessageBox::StandardButton question;
         question = QMessageBox::warning(this, tr("ShaderSandbox"),
@@ -457,7 +457,7 @@ bool EditorWindow::saveDialog(){
  *
  * loads a file of a given name
  */
-void EditorWindow::loadFile(const QString &path, bool v, bool f){
+void EditorWindow::loadFile(const QString &path, bool v, bool f) noexcept{
     QFileInfo fileInfo(path);
     QString suffix = fileInfo.suffix().toLower();
     bool vertexFile = !f && (v || suffix == "vs" || suffix == "vert" || suffix == "vertex" || suffix == "vertexshader");
@@ -518,7 +518,7 @@ void EditorWindow::loadFile(const QString &path, bool v, bool f){
  *
  * saves the current file under a provided name
  */
-bool EditorWindow::saveFile(){
+bool EditorWindow::saveFile() noexcept{
     QStringList editor;
     bool ok;
     editor << "Both" << "VertexShader" << "FragmentShader";
@@ -533,7 +533,7 @@ bool EditorWindow::saveFile(){
         return saveFile(choice);
 }
 
-bool EditorWindow::saveFile(QString shaderType){
+bool EditorWindow::saveFile(QString shaderType) noexcept{
     QFile file;
     if(shaderType == "VertexShader" && (currentVertexFile.isEmpty() || currentVertexFile == vertexTemplate))
         file.setFileName(QFileDialog::getSaveFileName(this));
@@ -587,7 +587,7 @@ bool EditorWindow::saveFile(QString shaderType){
  *
  * sets the file name and displays it at the top of the window
  */
-void EditorWindow::setAsCurrentFile(const QString &vertexFile, const QString &fragmentFile){
+void EditorWindow::setAsCurrentFile(const QString &vertexFile, const QString &fragmentFile) noexcept{
     currentVertexFile = vertexFile;
     currentFragmentFile = fragmentFile;
 
@@ -616,6 +616,6 @@ void EditorWindow::setAsCurrentFile(const QString &vertexFile, const QString &fr
  *
  * strips the fully qualified name of a file to the unqualified one
  */
-QString EditorWindow::stripName(const QString &fullName){
+QString EditorWindow::stripName(const QString &fullName) noexcept{
     return QFileInfo(fullName).fileName();
 }

@@ -38,7 +38,7 @@ LayoutTab::LayoutTab(QHash<QString, QVariant> *Settings, QWidget* parent) : Sett
  *
  * Creates the layout tab UI and makes it interactive.
  */
-void LayoutTab::addLayout(){
+void LayoutTab::addLayout() noexcept{
     design = new QGroupBox(tr("Design"));
 
     designBoxLabel = new QLabel(tr("Design:"));
@@ -120,7 +120,7 @@ void LayoutTab::addLayout(){
  * SLOT that reacts to the currentIndexChanged SIGNAL
  * of the Design drop down list. Changes it according to the users input.
  */
-void LayoutTab::designSettings(QString text){
+void LayoutTab::designSettings(QString text) noexcept{
     settings->insert("Design", text);
     Q_EMIT contentChanged();
 }
@@ -133,7 +133,7 @@ void LayoutTab::designSettings(QString text){
  * SLOT that reacts to the currentIndexChanged SIGNAL
  * of the Highlighting drop down list. Changes it according to the users input.
  */
-void LayoutTab::hlSettings(int index){
+void LayoutTab::hlSettings(int index) noexcept{
     settings->insert("Highlighting", index);
     Q_EMIT contentChanged();
 }
@@ -146,7 +146,7 @@ void LayoutTab::hlSettings(int index){
  * SLOT that reacts to the currentIndexChanged SIGNAL
  * of the Language drop down list. Changes it according to the users input.
  */
-void LayoutTab::languageSettings(int index){
+void LayoutTab::languageSettings(int index) noexcept{
     settings->insert("Language", index);
     Q_EMIT contentChanged();
 }
@@ -176,7 +176,7 @@ BehaviourTab::~BehaviourTab(){
  *
  * Creates the layout tab UI and makes it interactive.
  */
-void BehaviourTab::addLayout(){
+void BehaviourTab::addLayout() noexcept{
     startup = new QGroupBox(tr("Startup Behaviour"));
     openCheck = new QCheckBox(tr("Open Last Files On Startup"));
     sizeCheck = new QCheckBox(tr("Remember Size Of Application"));
@@ -206,7 +206,7 @@ void BehaviourTab::addLayout(){
  * openCheck. Writes change to Hashlist and Q_EMITs
  * a contentChanged signal.
  */
-void BehaviourTab::openSlot(bool toggled){
+void BehaviourTab::openSlot(bool toggled) noexcept{
     settings->insert("OpenFiles", toggled);
     Q_EMIT contentChanged();
 }
@@ -219,7 +219,7 @@ void BehaviourTab::openSlot(bool toggled){
  * sizeCheck. Writes change to Hashlist and Q_EMITs
  * a contentChanged signal.
  */
-void BehaviourTab::sizeSlot(bool toggled){
+void BehaviourTab::sizeSlot(bool toggled) noexcept{
     settings->insert("RememberSize", toggled);
     Q_EMIT contentChanged();
 }

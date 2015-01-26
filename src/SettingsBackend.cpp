@@ -17,7 +17,7 @@ const QString SettingsBackend::globalDir = "Live Code Editor";
  */
 QVariant SettingsBackend::getSettingsFor(const QString key,
                                          const QVariant defaultOption,
-                                         const int id){
+                                         const int id) noexcept{
     QString relevantSubdir(globalDir + "/" + QString::number(id));
     QSettings set(globalName, relevantSubdir);
     return set.value(key, defaultOption);
@@ -33,7 +33,7 @@ QVariant SettingsBackend::getSettingsFor(const QString key,
  * Takes a key and a default option. Gets the
  * settings for the key or returns defaultOption.
  */
-QVariant SettingsBackend::getSettingsFor(const QString key, const QVariant &defaultOption){
+QVariant SettingsBackend::getSettingsFor(const QString key, const QVariant &defaultOption) noexcept{
     QSettings settings(globalName, globalDir);
     return settings.value(key, defaultOption);
 }
@@ -46,7 +46,7 @@ QVariant SettingsBackend::getSettingsFor(const QString key, const QVariant &defa
  * gets the settings for a child window and
  * translates it to a QHash that is returned.
  */
-QHash<QString, QVariant> SettingsBackend::getSettings(const int id){
+QHash<QString, QVariant> SettingsBackend::getSettings(const int id) noexcept{
     QHash<QString, QVariant> settings;
     QString relevantSubdir(globalDir + "/" + QString::number(id));
     QSettings set(globalName, relevantSubdir);
@@ -62,7 +62,7 @@ QHash<QString, QVariant> SettingsBackend::getSettings(const int id){
  *
  * Adds an entry to the global settings.
  */
-void SettingsBackend::addSettings(const QString key, const QVariant value){
+void SettingsBackend::addSettings(const QString key, const QVariant value) noexcept{
     QSettings settings(globalName, globalDir);
     settings.setValue(key, value);
 }
@@ -77,14 +77,13 @@ void SettingsBackend::addSettings(const QString key, const QVariant value){
  *
  * Saves the settings of a instance.
  */
-void SettingsBackend::saveSettingsFor(const int id, const QString &key, const QVariant &value)
-{
+void SettingsBackend::saveSettingsFor(const int id, const QString &key, const QVariant &value) noexcept{
     QString relevantSubdir(globalDir + "/" + QString::number(id));
     QSettings set(globalName, relevantSubdir);
     set.setValue(key, value);
 }
 
-void SettingsBackend::saveSettingsFor(const int id, const QHash<QString, QVariant> &settings){
+void SettingsBackend::saveSettingsFor(const int id, const QHash<QString, QVariant> &settings) noexcept{
     QString relevantSubdir(globalDir + "/" + QString::number(id));
     QSettings set(globalName, relevantSubdir);
     for(auto &key : settings.keys())
@@ -97,7 +96,7 @@ void SettingsBackend::saveSettingsFor(const int id, const QHash<QString, QVarian
  *
  * Removes the settings of a child.
  */
-void SettingsBackend::removeSettings(const int id){
+void SettingsBackend::removeSettings(const int id) noexcept{
     QString relevantSubdir(globalDir + "/" + QString::number(id));
     QSettings set(globalName, relevantSubdir);
     set.clear();

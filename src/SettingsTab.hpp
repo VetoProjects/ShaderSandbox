@@ -43,10 +43,10 @@ public:
     LayoutTab(QHash<QString, QVariant> *Settings, QWidget* parent = 0);
     ~LayoutTab();
 private Q_SLOTS:
-    void addLayout();
-    void designSettings(QString);
-    void hlSettings(int);
-    void languageSettings(int);
+    void addLayout() noexcept;
+    void designSettings(QString) noexcept;
+    void hlSettings(int) noexcept;
+    void languageSettings(int) noexcept;
 private:
     QGroupBox* design;
     QLabel* designBoxLabel;
@@ -80,10 +80,10 @@ public:
     BehaviourTab(QHash<QString, QVariant> *Settings, QWidget* parent = 0);
     ~BehaviourTab();
 private Q_SLOTS:
-    void openSlot(bool);
-    void sizeSlot(bool);
+    void openSlot(bool) noexcept;
+    void sizeSlot(bool) noexcept;
 private:
-    void addLayout();
+    void addLayout() noexcept;
 
     QGroupBox* startup;
     QCheckBox* openCheck;

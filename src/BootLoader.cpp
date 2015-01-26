@@ -27,7 +27,7 @@ BootLoader::~BootLoader(){
  *
  * starts the BootLoader/socket. runs asynchronously.
  */
-void BootLoader::start()
+void BootLoader::start() noexcept
 {
     server = new QLocalServer(this);
     connect(server, SIGNAL(newConnection()), this, SLOT(acceptConnection()));
@@ -42,7 +42,7 @@ void BootLoader::start()
  * registers it with the backend(so it will run in the main app)
  * and kills the original client.
  */
-void BootLoader::acceptConnection(){
+void BootLoader::acceptConnection() noexcept{
     QLocalSocket *client = server->nextPendingConnection();
     QByteArray request = client->readAll();
     client->close();

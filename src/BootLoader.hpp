@@ -24,10 +24,10 @@ private:
 public:
     explicit BootLoader(const QString &socketName, Backend *parent = 0);
     ~BootLoader();
-    void start();
+    void start() noexcept;
 
 public Q_SLOTS:
-    void acceptConnection();
+    void acceptConnection() noexcept;
 };
 
 #endif // BOOTLOADER_HPP
