@@ -83,8 +83,6 @@ private:
 
     int templateNum;
 
-    QString vertexName, fragmentName;
-
     QSplitter *codeEditors;
     CodeEditor *vertexCodeEditor, *fragmentCodeEditor;
     QString currentVertexFile, currentFragmentFile;

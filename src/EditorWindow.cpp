@@ -132,7 +132,7 @@ void EditorWindow::newFile(){
         }
 
         vertexCodeEditor->clear();
-        setAsCurrentFile("", fragmentName);
+        setAsCurrentFile("", currentFragmentFile);
         loadFile(vertexTemplate);
     }
 
@@ -149,7 +149,7 @@ void EditorWindow::newFile(){
         }
 
         fragmentCodeEditor->clear();
-        setAsCurrentFile(vertexName, "");
+        setAsCurrentFile(currentVertexFile, "");
         loadFile(fragmentTemplate);
     }
 }
@@ -272,11 +272,11 @@ void EditorWindow::applySettings(const QHash<QString, QVariant> &settings){
     modelRotation.setZ(settings.value("modelRotationZ", 0).toFloat());
     objectLoaderDialog->setData(modelFile, modelOffset, modelScaling, modelRotation);
 
-    vertexName = settings.value("vertexFile", vertexTemplate).toString();
-    fragmentName = settings.value("fragmentFile", fragmentTemplate).toString();
+    currentVertexFile = settings.value("vertexFile", vertexTemplate).toString();
+    currentFragmentFile = settings.value("fragmentFile", fragmentTemplate).toString();
 
-    loadFile(vertexName, true, false);
-    loadFile(fragmentName, false, true);
+    loadFile(currentVertexFile, true, false);
+    loadFile(currentFragmentFile, false, true);
 }
 
 /**
@@ -494,13 +494,11 @@ void EditorWindow::loadFile(const QString &path, bool v, bool f){
 
     if(vertexFile){
         vertexCodeEditor->setPlainText(in.readAll());
-        setAsCurrentFile(path, currentVertexFile);
-        Q_EMIT changedSetting(this, "vertexFile", path);
+        setAsCurrentFile(path, currentFragmentFile);
     }
     if(fragmentFile){
         fragmentCodeEditor->setPlainText(in.readAll());
         setAsCurrentFile(currentVertexFile, path);
-        Q_EMIT changedSetting(this, "fragmentFile", path);
     }
 
 #ifndef QT_NO_CURSOR
@@ -536,14 +534,14 @@ bool EditorWindow::saveFile(){
 
 bool EditorWindow::saveFile(QString shaderType){
     QFile file;
-    if(shaderType == "VertexShader" && (vertexName.isEmpty() || vertexName == vertexTemplate))
+    if(shaderType == "VertexShader" && (currentVertexFile.isEmpty() || currentVertexFile == vertexTemplate))
         file.setFileName(QFileDialog::getSaveFileName(this));
-    else if(shaderType == "FragmentShader" && (fragmentName.isEmpty() || fragmentName == fragmentTemplate))
+    else if(shaderType == "FragmentShader" && (currentFragmentFile.isEmpty() || currentFragmentFile == fragmentTemplate))
         file.setFileName(QFileDialog::getSaveFileName(this));
     else if(shaderType == "VertexShader")
-        file.setFileName(vertexName);
+        file.setFileName(currentVertexFile);
     else
-        file.setFileName(fragmentName);
+        file.setFileName(currentFragmentFile);
 
 
     if(file.fileName().isEmpty()) return false;
@@ -566,17 +564,17 @@ bool EditorWindow::saveFile(QString shaderType){
 
     if(shaderType == "VertexShader"){
         out << vertexCodeEditor->toPlainText();
-        vertexName = file.fileName();
+        currentVertexFile = file.fileName();
     } else {
         out << fragmentCodeEditor->toPlainText();
-        fragmentName = file.fileName();
+        currentFragmentFile = file.fileName();
     }
 
 #ifndef QT_NO_CURSOR
     QApplication::restoreOverrideCursor();
 #endif
 
-    setAsCurrentFile(vertexName, fragmentName);
+    setAsCurrentFile(currentVertexFile, currentFragmentFile);
     statusBar()->showMessage(tr("File saved"), 2000);
     return true;
 }
@@ -591,6 +589,9 @@ bool EditorWindow::saveFile(QString shaderType){
 void EditorWindow::setAsCurrentFile(const QString &vertexFile, const QString &fragmentFile){
     currentVertexFile = vertexFile;
     currentFragmentFile = fragmentFile;
+
+    Q_EMIT changedSetting(this, "vertexFile", vertexFile);
+    Q_EMIT changedSetting(this, "fragmentFile", fragmentFile);
 
     vertexCodeEditor->document()->setModified(false);
     fragmentCodeEditor->document()->setModified(false);
