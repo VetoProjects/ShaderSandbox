@@ -38,7 +38,7 @@ private Q_SLOTS:
     void selectFile() noexcept;
 
 Q_SIGNALS:
-    void objectInfo(const QString&, const QVector3D &, const QVector3D &, const QVector3D &) noexcept;
+    void objectInfo(const QString&, const QVector3D &, const QVector3D &, const QVector3D &);
 
 private:
     void setupLayout() noexcept;
