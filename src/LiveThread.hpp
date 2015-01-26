@@ -47,7 +47,7 @@ public:
         connect(runObj, &Renderer::errored, this, &GlLiveThread::erroredReceived);
 
         runObj->resize(800, 600);
-        //runObj->show();
+        runObj->show();
     }
     bool updateCode(const QString &vertexShader, const QString &fragmentShader) noexcept{
         return runObj && runObj->updateCode(vertexShader, fragmentShader);

@@ -50,7 +50,7 @@ QHash<QString, QVariant> SettingsBackend::getSettings(const int id) noexcept{
     QHash<QString, QVariant> settings;
     QString relevantSubdir(globalDir + "/" + QString::number(id));
     QSettings set(globalName, relevantSubdir);
-    for(auto &key: set.childKeys())
+    for(auto &key : set.childKeys())
         settings.insert(key, set.value(key));
     return settings;
 }
