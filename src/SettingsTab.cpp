@@ -50,7 +50,7 @@ void LayoutTab::addLayout() noexcept{
             designBox->setCurrentIndex(designBox->count() - 1);
     }
 
-    connect(designBox, SIGNAL(currentTextChanged(QString)), this, SLOT(designSettings(QString)));
+    connect(designBox, &QComboBox::currentTextChanged, this, &LayoutTab::designSettings);
 
     verticalDesign = new QHBoxLayout;
     verticalDesign->addWidget(designBoxLabel);
@@ -72,6 +72,7 @@ void LayoutTab::addLayout() noexcept{
     if(hlConfig >= 0 && hlConfig <= 2)
         hlBox->setCurrentIndex(hlConfig);
 
+    // old style connect because of overloaded function
     connect(hlBox, SIGNAL(currentIndexChanged(int)),
             this, SLOT(hlSettings(int)));
 
@@ -94,6 +95,7 @@ void LayoutTab::addLayout() noexcept{
     if(languageConfig >= 0 || languageConfig <= 1)
         languageBox->setCurrentIndex(languageConfig);
 
+    // old style connect because of overloaded function
     connect(languageBox, SIGNAL(currentIndexChanged(int)),
             this, SLOT(languageSettings(int)));
 

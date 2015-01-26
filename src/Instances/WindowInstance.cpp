@@ -106,14 +106,14 @@ void WindowInstance::codeStopped()
  */
 bool WindowInstance::close()
 {
-    disconnect(window, SIGNAL(closing(EditorWindow*)), this, SLOT(gotClosing(EditorWindow*)));
+    disconnect(window, &EditorWindow::closing, this, &WindowInstance::gotClosing);
     if(window->close()){
-        disconnect(window, SIGNAL(destroyed(QObject*)), this, SLOT(gotDestroying(QObject*))); // Prevent of call gotDestroying
+        disconnect(window, &EditorWindow::destroyed, this, &WindowInstance::gotDestroying); // Prevent of call gotDestroying
         window->deleteLater();
         window = 0;
         return true;
     }
-    connect(window, SIGNAL(closing(EditorWindow*)), this, SLOT(gotClosing(EditorWindow*)));
+    connect(window, &EditorWindow::closing, this, &WindowInstance::gotClosing);
     return false;
 }
 
@@ -216,16 +216,17 @@ void WindowInstance::createWindow(const QHash<QString,QVariant> &settings)
 {
     if(!window){
         window = new EditorWindow(settings);
-        connect(window, SIGNAL(destroyed(QObject*))        , this, SLOT(gotDestroying(QObject*)));
-        connect(window, SIGNAL(closing(EditorWindow*))     , this, SLOT(gotClosing(EditorWindow*)));
-        connect(window, SIGNAL(closeAll(EditorWindow*))    , this, SLOT(gotCloseAll(EditorWindow*)));
-        connect(window, SIGNAL(runCode(EditorWindow*))     , this, SLOT(gotRunCode(EditorWindow*)));
-        connect(window, SIGNAL(stopCode(EditorWindow*))    , this, SLOT(gotStopCode(EditorWindow*)));
-        connect(window, SIGNAL(openHelp(EditorWindow*))    , this, SLOT(gotOpenHelp(EditorWindow*)));
-        connect(window, SIGNAL(openSettings(EditorWindow*)), this, SLOT(gotOpenSettings(EditorWindow*)));
-        connect(window, SIGNAL(changedSetting(EditorWindow*,QString,QVariant)),         this, SLOT(gotChangedSetting(EditorWindow*,QString,QVariant)));
-        connect(window, SIGNAL(changedSettings(EditorWindow*,QHash<QString,QVariant>)), this, SLOT(gotChangedSettings(EditorWindow*,QHash<QString,QVariant>)));
-        connect(window, &EditorWindow::loadModel, [=](const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation){
+        connect(window, &EditorWindow::destroyed      , this, &WindowInstance::gotDestroying);
+        connect(window, &EditorWindow::closing        , this, &WindowInstance::gotClosing);
+        connect(window, &EditorWindow::closeAll       , this, &WindowInstance::gotCloseAll);
+        connect(window, &EditorWindow::runCode        , this, &WindowInstance::gotRunCode);
+        connect(window, &EditorWindow::stopCode       , this, &WindowInstance::gotStopCode);
+        connect(window, &EditorWindow::openHelp       , this, &WindowInstance::gotOpenHelp);
+        connect(window, &EditorWindow::openSettings   , this, &WindowInstance::gotOpenSettings);
+        connect(window, &EditorWindow::changedSetting , this, &WindowInstance::gotChangedSetting);
+        connect(window, &EditorWindow::changedSettings, this, &WindowInstance::gotChangedSettings);
+        connect(window, &EditorWindow::loadModel, [=](const QString &file, const QVector3D &offset,
+                                                      const QVector3D &scaling, const QVector3D &rotation){
             Q_EMIT loadModel(this, file, offset, scaling, rotation);
         });
         window->show();

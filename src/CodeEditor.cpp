@@ -14,9 +14,9 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent){
     lineHighlighting = new LineHighlighting(this);
     syntaxEngine = new CodeHighlighter(this->document());
 
-    connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updatelineHighlightingWidth()));
-    connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updatelineHighlighting(QRect,int)));
-    connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
+    connect(this, &CodeEditor::blockCountChanged, this, &CodeEditor::updatelineHighlightingWidth);
+    connect(this, &CodeEditor::updateRequest, this, &CodeEditor::updatelineHighlighting);
+    connect(this, &CodeEditor::cursorPositionChanged, this, &CodeEditor::highlightCurrentLine);
 
     updatelineHighlightingWidth();
     highlightCurrentLine();

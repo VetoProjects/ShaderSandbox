@@ -15,9 +15,9 @@ SettingsWindow::SettingsWindow(int subDirNum){
     behaviour = new BehaviourTab(&settingsDict, this);
     changed = false;
     tabs->addTab(layout, "Layout");
-    connect(layout, SIGNAL(contentChanged()), this, SLOT(changedTrue()));
+    connect(layout, &LayoutTab::contentChanged, this, &SettingsWindow::changedTrue);
     tabs->addTab(behaviour, "Behaviour");
-    connect(behaviour, SIGNAL(contentChanged()), this, SLOT(changedTrue()));
+    connect(behaviour, &BehaviourTab::contentChanged, this, &SettingsWindow::changedTrue);
 
     QHBoxLayout* horizontal = new QHBoxLayout;
     horizontal->addWidget(tabs, 1);
@@ -25,9 +25,9 @@ SettingsWindow::SettingsWindow(int subDirNum){
     QPushButton* applyBut = new QPushButton(tr("Apply Changes"));
     QPushButton* applycloseBut = new QPushButton(tr("Apply and Exit"));
     QPushButton* closeBut = new QPushButton(tr("Close"));
-    connect(applyBut, SIGNAL(clicked()), this, SLOT(apply()));
-    connect(applycloseBut, SIGNAL(clicked()), this, SLOT(applyClose()));
-    connect(closeBut, SIGNAL(clicked()), this, SLOT(tryClose()));
+    connect(applyBut, &QPushButton::clicked, this, &SettingsWindow::apply);
+    connect(applycloseBut, &QPushButton::clicked, this, &SettingsWindow::applyClose);
+    connect(closeBut, &QPushButton::clicked, this, &SettingsWindow::tryClose);
 
     QHBoxLayout* buttons = new QHBoxLayout;
     buttons->addStretch(1);

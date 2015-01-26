@@ -8,8 +8,8 @@ ObjectLoaderDialog::ObjectLoaderDialog(QDialog* parent) : QDialog(parent){
 void ObjectLoaderDialog::setupLayout() noexcept{
     QPushButton* closeBut = new QPushButton(tr("Cancel"));
     QPushButton* loadBut = new QPushButton(tr("Load Object"));
-    connect(loadBut, SIGNAL(clicked()), this, SLOT(load()));
-    connect(closeBut, SIGNAL(clicked()), this, SLOT(close()));
+    connect(loadBut, &QPushButton::clicked, this, &ObjectLoaderDialog::load);
+    connect(closeBut, &QPushButton::clicked, this, &ObjectLoaderDialog::close);
 
     setupCoordinateBoxes();
     setupFileChooser();
@@ -73,7 +73,7 @@ void ObjectLoaderDialog::setupFileChooser() noexcept{
     fileNameBox = new QLineEdit("");
     fileChoosingButton = new QPushButton(tr("Select File..."));
 
-    connect(fileChoosingButton, SIGNAL(clicked()), this, SLOT(selectFile()));
+    connect(fileChoosingButton, &QPushButton::clicked, this, &ObjectLoaderDialog::selectFile);
 }
 
 void ObjectLoaderDialog::selectFile() noexcept{

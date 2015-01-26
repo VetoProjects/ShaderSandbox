@@ -41,8 +41,8 @@ EditorWindow::EditorWindow(const QHash<QString, QVariant> &settings, QWidget *pa
     addToolBars();
     addStatusBar();
 
-    connect(vertexCodeEditor->document(), SIGNAL(contentsChanged()), this, SLOT(docModified()));
-    connect(fragmentCodeEditor->document(), SIGNAL(contentsChanged()), this, SLOT(docModified()));
+    connect(vertexCodeEditor->document(), &QTextDocument::contentsChanged, this, &EditorWindow::docModified);
+    connect(fragmentCodeEditor->document(), &QTextDocument::contentsChanged, this, &EditorWindow::docModified);
 
     applySettings(settings);
 
@@ -337,41 +337,42 @@ void EditorWindow::addActions() noexcept{
     newAction = new QAction(QIcon(":/images/new.png"), tr("&New File"), this);
     newAction->setShortcuts(QKeySequence::New);
     newAction->setStatusTip(tr("Create a new file"));
-    connect(newAction, SIGNAL(triggered()), this, SLOT(newFile()));
+    connect(newAction, &QAction::triggered, this, &EditorWindow::newFile);
 
     openAction = new QAction(QIcon(":/images/open.png"), tr("&Open..."), this);
     openAction->setShortcuts(QKeySequence::Open);
     openAction->setStatusTip(tr("Open an existing file"));
-    connect(openAction, SIGNAL(triggered()), this, SLOT(openFile()));
+    connect(openAction, &QAction::triggered, this, &EditorWindow::openFile);
 
     saveAction = new QAction(QIcon(":/images/save.png"), tr("&Save"), this);
     saveAction->setShortcuts(QKeySequence::Save);
     saveAction->setStatusTip(tr("Save the document to disk"));
+    // Old style because of overloaded member function triggered
     connect(saveAction, SIGNAL(triggered()), this, SLOT(saveFile()));
 
     exitAction = new QAction(tr("E&xit"), this);
     exitAction->setShortcuts(QKeySequence::Quit);
     exitAction->setStatusTip(tr("Exit the application"));
-    connect(exitAction, SIGNAL(triggered()), this, SLOT(gotCloseAll()));
+    connect(exitAction, &QAction::triggered, this, &EditorWindow::gotCloseAll);
 
     runAction = new QAction(QIcon(":/images/run.png"), tr("&Run"), this);
     runAction->setShortcuts(QKeySequence::Refresh);
     runAction->setStatusTip(tr("Runs the code in the editor"));
-    connect(runAction, SIGNAL(triggered()), this, SLOT(runFile()));
+    connect(runAction, &QAction::triggered, this, &EditorWindow::runFile);
 
     settingsAction = new QAction(QIcon(":/images/settings.png"), tr("Settings"), this);
     settingsAction->setShortcuts(QKeySequence::Preferences);
     settingsAction->setStatusTip(tr("Opens A Settings Window"));
-    connect(settingsAction, SIGNAL(triggered()), this, SLOT(gotOpenSettings()));
+    connect(settingsAction, &QAction::triggered, this, &EditorWindow::gotOpenSettings);
 
     helpAction = new QAction(tr("About"), this);
     helpAction->setShortcuts(QKeySequence::HelpContents);
     helpAction->setStatusTip(tr("Opens the Help"));
-    connect(helpAction, SIGNAL(triggered()), this, SLOT(gotOpenHelp()));
+    connect(helpAction, &QAction::triggered, this, &EditorWindow::gotOpenHelp);
 
     loadObjectAction = new QAction(QIcon(":/images/object.png"), tr("Load Object"), this);
     loadObjectAction->setStatusTip(tr("Loads an object into your 3D-World"));
-    connect(loadObjectAction, SIGNAL(triggered()), objectLoaderDialog, SLOT(show()));
+    connect(loadObjectAction, &QAction::triggered, objectLoaderDialog, &ObjectLoaderDialog::show);
 }
 
 /**

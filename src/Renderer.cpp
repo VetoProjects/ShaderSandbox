@@ -46,8 +46,8 @@ Renderer::Renderer(const QString &vertexShader, const QString &fragmentShader, Q
 
     m_logger = new QOpenGLDebugLogger( this );
 
-    connect(m_logger, SIGNAL(messageLogged(QOpenGLDebugMessage)),
-             this, SLOT(onMessageLogged(QOpenGLDebugMessage)),
+    connect(m_logger, &QOpenGLDebugLogger::messageLogged,
+             this, &Renderer::onMessageLogged,
              Qt::DirectConnection);
 
     setSurfaceType(QWindow::OpenGLSurface);
@@ -73,7 +73,7 @@ Renderer::Renderer(const QString &vertexShader, const QString &fragmentShader, Q
     time->start();
 
     audio = new AudioInputProcessor(this);
-    connect(audio, SIGNAL(processData(QByteArray)), this, SLOT(updateAudioData(QByteArray)));
+    connect(audio, &AudioInputProcessor::processData, this, &Renderer::updateAudioData);
     audio->start();
 }
 

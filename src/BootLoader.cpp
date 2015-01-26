@@ -30,7 +30,7 @@ BootLoader::~BootLoader(){
 void BootLoader::start() noexcept
 {
     server = new QLocalServer(this);
-    connect(server, SIGNAL(newConnection()), this, SLOT(acceptConnection()));
+    connect(server, &QLocalServer::newConnection, this, &BootLoader::acceptConnection);
     server->listen(socketName);
 }
 
