@@ -33,7 +33,9 @@ public:
 
 Q_SIGNALS:
     void doneSignal(QString);
-    void errored(QString, int);
+    void errored(QString);
+    void vertexError(QString, int);
+    void fragmentError(QString, int);
 
 public Q_SLOTS:
     void renderNow();
@@ -42,7 +44,6 @@ public Q_SLOTS:
     void updateAudioData(QByteArray);
     void onMessageLogged(QOpenGLDebugMessage message);
     bool loadModel(const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation);
-    void uploadMVP();
 
 protected:
     virtual bool event(QEvent *);
@@ -63,7 +64,7 @@ private:
     GLuint vertexBuffer, uvBuffer, audioLeftTexture, audioRightTexture;
     GLint vertexAttr, uvAttr,
         timeUniform, mouseUniform, rationUniform, samplerLeft, samplerRight,
-        pID, vID, mID, mvID, mvpID;
+        mID, vID, pID;
     QOpenGLShaderProgram *shaderProgram;
     QMutex shaderProgramMutex;
     QString vertexSource, fragmentSource;
@@ -71,7 +72,7 @@ private:
     QString modelFile;
     QVector3D modelOffset, modelScaling, modelRotation;
     Model3D model;
-    QMatrix4x4 P, V, M, MV, MVP;
+    QMatrix4x4 P, V, M;
 
     AudioInputProcessor *audio;
 

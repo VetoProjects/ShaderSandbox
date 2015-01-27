@@ -31,7 +31,8 @@ public:
     ~EditorWindow();
     void showResults(const QString &) noexcept;
     void warningDisplay(const QString &) noexcept;
-    void highlightErroredLine(int) noexcept;
+    void highlightErroredVertexLine(int) noexcept;
+    void highlightErroredFragmentLine(int) noexcept;
     void codeStopped() noexcept;
 
     QString getVertexSourceCode() const noexcept;

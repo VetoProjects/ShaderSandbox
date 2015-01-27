@@ -43,8 +43,19 @@ public:
     // No parent object =(
     void initialize(const QString &vertexShader, const QString &fragmentShader) noexcept{
         runObj = new Renderer(vertexShader, fragmentShader);
-        connect(runObj, &Renderer::doneSignal, this, &GlLiveThread::doneSignalReceived);
-        connect(runObj, &Renderer::errored, this, &GlLiveThread::erroredReceived);
+
+        connect(runObj, &Renderer::doneSignal, [=](QString msg){
+            Q_EMIT doneSignal(this, msg);
+        });
+        connect(runObj, &Renderer::errored, [=](QString msg){
+            Q_EMIT errorSignal(this, msg);
+        });
+        connect(runObj, &Renderer::vertexError, [=](QString msg, int line){
+            Q_EMIT vertexError(this, msg, line);
+        });
+        connect(runObj, &Renderer::fragmentError, [=](QString msg, int line){
+            Q_EMIT fragmentError(this, msg, line);
+        });
 
         runObj->resize(800, 600);
         runObj->show();
@@ -55,17 +66,11 @@ public:
     bool loadModel(const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation) noexcept{
         return runObj && runObj->loadModel(file, offset, scaling, rotation);
     }
-
-public Q_SLOTS:
-    void doneSignalReceived(QString exception) noexcept{
-        Q_EMIT doneSignal(this, exception);
-    }
-    void erroredReceived(QString error, int lineno) noexcept{
-        Q_EMIT errorSignal(this, error, lineno);
-    }
 Q_SIGNALS:
     void doneSignal(GlLiveThread*, QString);
-    void errorSignal(GlLiveThread*, QString, int);
+    void errorSignal(GlLiveThread*, QString);
+    void vertexError(GlLiveThread*, QString, int);
+    void fragmentError(GlLiveThread*, QString, int);
 private:
     Renderer* runObj;
 };

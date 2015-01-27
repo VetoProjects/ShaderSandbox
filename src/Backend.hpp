@@ -66,7 +66,9 @@ public Q_SLOTS:
     void childSaidCloseAll() noexcept;
     void getExecutionResults(GlLiveThread*, QString) noexcept;
 
-    void getError(GlLiveThread*, QString, int) noexcept;
+    void getError(GlLiveThread*, QString) noexcept;
+    void getVertexError(GlLiveThread*, QString, int) noexcept;
+    void getFragmentError(GlLiveThread*, QString, int) noexcept;
 
 private:
     void runGlFile(IInstance *) noexcept;

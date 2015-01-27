@@ -237,15 +237,25 @@ void EditorWindow::codeStopped() noexcept
 }
 
 /**
- * @brief EditorWindow::highlightErroredLine
+ * @brief EditorWindow::highlightErroredVertexLine
  * @param lineno
  *
  * Highlights a given line in red. Signifies an error in
  * that line.
  */
-void EditorWindow::highlightErroredLine(int lineno) noexcept{
+void EditorWindow::highlightErroredVertexLine(int lineno) noexcept{
     vertexCodeEditor->highlightErroredLine(lineno);
-    // TODO: filter fragment-shader-errors
+}
+
+/**
+ * @brief EditorWindow::highlightErroredFragmentLine
+ * @param lineno
+ *
+ * Highlights a given line in red. Signifies an error in
+ * that line.
+ */
+void EditorWindow::highlightErroredFragmentLine(int lineno) noexcept{
+    fragmentCodeEditor->highlightErroredLine(lineno);
 }
 
 /**

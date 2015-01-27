@@ -37,7 +37,7 @@ Renderer::Renderer(const QString &vertexShader, const QString &fragmentShader, Q
     pendingUpdate(false),
     vao(0), uvBuffer(0), audioLeftTexture(0), audioRightTexture(0),
     vertexAttr(0), uvAttr(0), timeUniform(0),
-    mID(0), mvID(0), mvpID(0),
+    mID(0), vID(0), pID(0),
     shaderProgram(0),
     vertexSource(vertexShader), fragmentSource(fragmentShader),
     textureRegEx("(^|\n|\r)\\s*#texture\\s+([A-Za-z_][A-Za-z0-9_]*)\\s+([^\n\r]+)")
@@ -47,8 +47,7 @@ Renderer::Renderer(const QString &vertexShader, const QString &fragmentShader, Q
     m_logger = new QOpenGLDebugLogger( this );
 
     connect(m_logger, &QOpenGLDebugLogger::messageLogged,
-             this, &Renderer::onMessageLogged,
-             Qt::DirectConnection);
+            this, &Renderer::onMessageLogged, Qt::DirectConnection);
 
     setSurfaceType(QWindow::OpenGLSurface);
 
@@ -73,7 +72,8 @@ Renderer::Renderer(const QString &vertexShader, const QString &fragmentShader, Q
     time->start();
 
     audio = new AudioInputProcessor(this);
-    connect(audio, &AudioInputProcessor::processData, this, &Renderer::updateAudioData);
+    connect(audio, &AudioInputProcessor::processData,
+            this,  &Renderer::updateAudioData);
     audio->start();
 }
 
@@ -147,6 +147,7 @@ bool Renderer::init(){
     return result;
 }
 
+
 /**
  * @brief Renderer::initShaders
  * @param fragmentShader Code to compile as shader
@@ -177,7 +178,7 @@ bool Renderer::initShaders(QString vertexShader, QString fragmentShader){
                 else
                     initShaders(defaultVertexShader, defaultFragmentShader);
             }
-            Q_EMIT errored("Image file does not exist: " + imagePath, fragmentShader.mid(0, pos).count('\n'));
+            Q_EMIT fragmentError("Image file does not exist: " + imagePath, fragmentShader.mid(0, pos).count('\n'));
             return false;
         }
 
@@ -190,33 +191,29 @@ bool Renderer::initShaders(QString vertexShader, QString fragmentShader){
     }
 	
     QOpenGLShaderProgram *newShaderProgram = new QOpenGLShaderProgram(this);
-    bool hasError = false;
-	
-    if(!hasError && !newShaderProgram->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShader)){
-        hasError = true;
-    }
+    bool vertexOk = newShaderProgram->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShader);
+    bool fragmentOk = vertexOk && newShaderProgram->addShaderFromSourceCode(QOpenGLShader::Fragment,fragmentShader);
+    bool linkOk = fragmentOk && newShaderProgram->link();
 
-    if(!hasError && !newShaderProgram->addShaderFromSourceCode(QOpenGLShader::Fragment,fragmentShader)){
-        hasError = true;
-    }
-
-    if(!hasError && !newShaderProgram->link()){
-        hasError = true;
-    }
-
-    if(hasError){
+    if(!linkOk){
         QString error = newShaderProgram->log();
         delete newShaderProgram;
 
-        //mac  :<line>:
-        //mesa :<line>(<errorcode>):
-        QRegExp errorline(":([0-9]+)(\\([0-9]+\\))?:");
-        if(errorline.indexIn(error) > -1){
-            QString text = errorline.cap(1);
-            if(text.toInt()-3 > 0)  // because: "#define lowp", "#define mediump" and "#define highp"
-                Q_EMIT errored(error, text.toInt()-3);
-            else
-                Q_EMIT errored(error, text.toInt());
+        if(vertexOk && fragmentOk)
+            Q_EMIT errored(error);
+        else{
+            //mac  :<line>:
+            //mesa :<line>(<errorcode>):
+            QRegExp errorline(":([0-9]+)(\\([0-9]+\\))?:");
+            if(errorline.indexIn(error) > -1){
+                QString text = errorline.cap(1);
+                int line = text.toInt();
+                if (line >= 3) line -= 3;
+                if(!vertexOk)
+                    Q_EMIT vertexError(error, line);
+                else
+                    Q_EMIT fragmentError(error, line);
+            }
         }
 
         if(shaderProgram == 0 && (vertexShader != defaultFragmentShader || fragmentShader != defaultFragmentShader)){
@@ -268,8 +265,6 @@ bool Renderer::initShaders(QString vertexShader, QString fragmentShader){
         vID = shaderProgram->uniformLocation("V");
         pID = shaderProgram->uniformLocation("P");
         mID = shaderProgram->uniformLocation("M");
-        mvID = shaderProgram->uniformLocation("MV");
-        mvpID = shaderProgram->uniformLocation("MVP");
 
         timeUniform = shaderProgram->uniformLocation("time");
         mouseUniform = shaderProgram->uniformLocation("mouse");
@@ -339,11 +334,10 @@ void Renderer::render(){
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         vao->bind();
-        uploadMVP(); // attention: uncomment mutex => deadlock
 
-// TODO: Find good start M, V and P (M from dialog, V and P by mouse / keyboard control?)
-// TODO: Light source
-
+        glUniformMatrix4fv(pID, 1, GL_FALSE, P.data());
+        glUniformMatrix4fv(vID, 1, GL_FALSE, V.data());
+        glUniformMatrix4fv(mID, 1, GL_FALSE, M.data());
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_1D, audioLeftTexture);
@@ -696,22 +690,4 @@ bool Renderer::loadModel(const QString &file, const QVector3D &offset, const QVe
 //    uploadMVP();
 
     return true;
-}
-
-void Renderer::uploadMVP(){
-//    if(shaderProgram){
-        MV = V * M;
-        MVP = P * MV;
-//        shaderProgramMutex.lock();
-//            shaderProgram->bind();
-//            vao->bind();
-            glUniformMatrix4fv(pID, 1, GL_FALSE, P.data());
-            glUniformMatrix4fv(vID, 1, GL_FALSE, V.data());
-            glUniformMatrix4fv(mID, 1, GL_FALSE, M.data());
-            glUniformMatrix4fv(mvID, 1, GL_FALSE, MV.data());
-            glUniformMatrix4fv(mvpID, 1, GL_FALSE, MVP.data());
-//            vao->release();
-//            shaderProgram->release();
-//        shaderProgramMutex.unlock();
-//    }
 }

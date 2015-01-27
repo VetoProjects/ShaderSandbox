@@ -77,14 +77,25 @@ void WindowInstance::reportWarning(const QString &text)
 }
 
 /**
- * @brief WindowInstance::highlightErroredLine
+ * @brief WindowInstance::highlightErroredVertexLine
  * @param lineno
  *
  * Highlight line number lineno as errored.
  */
-void WindowInstance::highlightErroredLine(int lineno)
+void WindowInstance::highlightErroredVertexLine(int lineno)
 {
-    window->highlightErroredLine(lineno);
+    window->highlightErroredVertexLine(lineno);
+}
+
+/**
+ * @brief WindowInstance::highlightErroredFragmentLine
+ * @param lineno
+ *
+ * Highlight line number lineno as errored.
+ */
+void WindowInstance::highlightErroredFragmentLine(int lineno)
+{
+    window->highlightErroredFragmentLine(lineno);
 }
 
 /**
