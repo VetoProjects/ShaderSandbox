@@ -415,13 +415,13 @@ void Renderer::handleInput(){
         mouseDragRight = QPoint();
     }
 
-    if(pressedKeys.contains(Qt::Key_W)){
+    if(pressedKeys.contains(Qt::Key_Control)){
         changed = true;
-        offset.setZ(offset.z() + timeDelta * keyMovementSpeed);
+        offset.setY(offset.y() + timeDelta * keyMovementSpeed);
     }
-    if(pressedKeys.contains(Qt::Key_S)){
+    if(pressedKeys.contains(Qt::Key_Space)){
         changed = true;
-        offset.setZ(offset.z() - timeDelta * keyMovementSpeed);
+        offset.setY(offset.y() - timeDelta * keyMovementSpeed);
     }
     if(pressedKeys.contains(Qt::Key_D)){
         changed = true;
@@ -431,16 +431,22 @@ void Renderer::handleInput(){
         changed = true;
         offset.setX(offset.x() + timeDelta * keyMovementSpeed);
     }
+    if(pressedKeys.contains(Qt::Key_S)){
+        changed = true;
+        offset.setZ(offset.z() - timeDelta * keyMovementSpeed);
+    }
+    if(pressedKeys.contains(Qt::Key_W)){
+        changed = true;
+        offset.setZ(offset.z() + timeDelta * keyMovementSpeed);
+    }
 
     if(changed){
         V = QMatrix4x4();
-        V.rotate(-cameraRotation, 0, 1, 0);
-        V.rotate(-cameraPitch, 1, 0, 0);
-        cameraPosition += V * offset;
-
-        V = QMatrix4x4();
         V.rotate(cameraPitch, 1, 0, 0);
         V.rotate(cameraRotation, 0, 1, 0);
+
+        cameraPosition += V.inverted() * offset;
+
         V.translate(cameraPosition);
     }
 }
