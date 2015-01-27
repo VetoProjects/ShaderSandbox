@@ -415,6 +415,8 @@ void Backend::runGlFile(IInstance *instance) noexcept{
     std::shared_ptr<GlLiveThread> thread(new GlLiveThread(instance->ID, this));
     connect(thread.get(), &GlLiveThread::doneSignal,  this, &Backend::getExecutionResults);
     connect(thread.get(), &GlLiveThread::errorSignal, this, &Backend::getError);
+    connect(thread.get(), &GlLiveThread::vertexError,   this, &Backend::getVertexError);
+    connect(thread.get(), &GlLiveThread::fragmentError, this, &Backend::getFragmentError);
     Renderer* runObj = new Renderer(instance->vertexSourceCode(), instance->fragmentSourceCode());
     runObj->resize(800, 600);
     runObj->show();
@@ -436,10 +438,20 @@ void Backend::getExecutionResults(GlLiveThread* thread, QString returnedExceptio
     terminateThread(thread->ID);
 }
 
-void Backend::getError(GlLiveThread* thread, QString error, int lineno) noexcept{
+void Backend::getError(GlLiveThread* thread, QString error) noexcept{
     instances[thread->ID]->reportWarning(error);
-    if(lineno >= 0)
-        instances[thread->ID]->highlightErroredLine(lineno);
+}
+
+void Backend::getVertexError(GlLiveThread* thread, QString error, int line) noexcept{
+    instances[thread->ID]->reportWarning(error);
+    if(line >= 0)
+        instances[thread->ID]->highlightErroredVertexLine(line);
+}
+
+void Backend::getFragmentError(GlLiveThread* thread, QString error, int line) noexcept{
+    instances[thread->ID]->reportWarning(error);
+    if(line >= 0)
+        instances[thread->ID]->highlightErroredFragmentLine(line);
 }
 
 /**

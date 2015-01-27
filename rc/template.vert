@@ -20,9 +20,6 @@ out vec3 csLightDirection;
 uniform mat4 M;
 uniform mat4 V;
 uniform mat4 P;
-uniform mat4 MV;
-uniform mat4 MVP;
-uniform vec3 wsLightPosition;
 
 uniform float time;
 uniform vec2 mouse;
@@ -34,6 +31,9 @@ uniform sampler1D audioRightData;
 
 float left (float val){ return texture(audioLeftData , val).r ; }
 float right(float val){ return texture(audioRightData, val).r ; }
+
+// uniform because it is used in fragment shader as well
+uniform vec3 wsLightPosition = vec3(0, 2, 2);
 
 void main(){
     float t = time / 1000;

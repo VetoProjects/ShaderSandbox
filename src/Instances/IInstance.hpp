@@ -22,7 +22,8 @@ public:
     virtual void reportError(const QString &) = 0;
     virtual void reportWarning(const QString &) = 0;
     virtual void codeStopped() = 0;
-    virtual void highlightErroredLine(int) = 0;
+    virtual void highlightErroredVertexLine(int) = 0;
+    virtual void highlightErroredFragmentLine(int) = 0;
     virtual QString vertexSourceCode() const = 0;
     virtual QString fragmentSourceCode() const = 0;
     virtual QString title() const = 0;

@@ -23,7 +23,8 @@ public:
     virtual bool close();
     virtual void reportError(const QString &message);
     virtual void reportWarning(const QString &);
-    virtual void highlightErroredLine(int);
+    virtual void highlightErroredVertexLine(int);
+    virtual void highlightErroredFragmentLine(int);
     virtual void codeStopped();
 
 private:
