@@ -16,7 +16,7 @@ class LiveThread : public QThread{
 public:
     LiveThread(const long identity, QObject* parent = 0): QThread(parent), ID(identity){}
     virtual void run() = 0;
-    virtual void initialize(const QString &vertexShader, const QString &fragmentShader) = 0;
+    virtual void initialize(Renderer* renderer) = 0;
     virtual bool updateCode(const QString &vertexShader, const QString &fragmentShader) = 0;
     virtual bool loadModel(const QString &file, const QVector3D &offset, const QVector3D &scaling, const QVector3D &rotation) = 0;
     const long ID;
@@ -36,18 +36,15 @@ public:
             delete runObj;
     }
     void run()  noexcept Q_DECL_OVERRIDE{
-        if(runObj)
-            runObj->show();
+        /*if(runObj)
+            runObj->show();*/
         exec();
     }
     // No parent object =(
-    void initialize(const QString &vertexShader, const QString &fragmentShader) noexcept{
-        runObj = new Renderer(vertexShader, fragmentShader);
+    void initialize(Renderer* renderer) noexcept Q_DECL_OVERRIDE{
+        runObj = renderer;
         connect(runObj, &Renderer::doneSignal, this, &GlLiveThread::doneSignalReceived);
         connect(runObj, &Renderer::errored, this, &GlLiveThread::erroredReceived);
-
-        runObj->resize(800, 600);
-        runObj->show();
     }
     bool updateCode(const QString &vertexShader, const QString &fragmentShader) noexcept{
         return runObj && runObj->updateCode(vertexShader, fragmentShader);
