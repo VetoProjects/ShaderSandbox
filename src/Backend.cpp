@@ -413,11 +413,14 @@ void Backend::instanceLoadModel(IInstance *instance, const QString &file, const 
  */
 void Backend::runGlFile(IInstance *instance) noexcept{
     std::shared_ptr<GlLiveThread> thread(new GlLiveThread(instance->ID, this));
-    connect(thread.get(), &GlLiveThread::doneSignal,    this, &Backend::getExecutionResults);
-    connect(thread.get(), &GlLiveThread::errorSignal,   this, &Backend::getError);
+    connect(thread.get(), &GlLiveThread::doneSignal,  this, &Backend::getExecutionResults);
+    connect(thread.get(), &GlLiveThread::errorSignal, this, &Backend::getError);
     connect(thread.get(), &GlLiveThread::vertexError,   this, &Backend::getVertexError);
     connect(thread.get(), &GlLiveThread::fragmentError, this, &Backend::getFragmentError);
-    thread->initialize(instance->vertexSourceCode(), instance->fragmentSourceCode());
+    Renderer* runObj = new Renderer(instance->vertexSourceCode(), instance->fragmentSourceCode());
+    runObj->resize(800, 600);
+    runObj->show();
+    thread->initialize(runObj);
     thread->start();
     threads.insert(thread->ID, thread);
 }
