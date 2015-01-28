@@ -4,13 +4,13 @@
 // Values from the vertex shaders
 in vec2 uv;
 in vec3 wsPosition;
+in vec3 wsLightPosition;
 in vec3 csNormal;
 in vec3 csEyeDirection;
 in vec3 csLightDirection;
 
 
 // Values that stay constant for the whole mesh.
-uniform vec3 wsLightPosition;
 uniform float time;
 uniform vec2 mouse;
 uniform float ration;

@@ -12,6 +12,7 @@ layout(location = 2) in vec3 msVertexNormal;
 // Output data ; will be set for each fragment.
 out vec2 uv;
 out vec3 wsPosition;
+out vec3 wsLightPosition;
 out vec3 csNormal;
 out vec3 csEyeDirection;
 out vec3 csLightDirection;
@@ -29,35 +30,21 @@ uniform sampler1D audioLeftData;
 uniform sampler1D audioRightData;
 
 
-float left (float val){ return texture(audioLeftData , val).r ; }
-float right(float val){ return texture(audioRightData, val).r ; }
-
-// uniform because it is used in fragment shader as well
-uniform vec3 wsLightPosition = vec3(0, 2, 2);
-
 void main(){
-    float t = time / 1000;
-    float st = sin(t);
-    float ct = cos(t);
-    mat4 turn = mat4(
-        st, 0 , ct, 0,
-        0 , 1 ,  0, 0,
-        ct, 0 ,-st, 0,
-        0 , 0 ,  0, 1
-    );
+    vec4 wsLightPos = vec4(0,2,2, 1);
 
     // manipulation of MVP before using it
-    mat4 m = turn * M, v = V, p = P, mv = v * m, mvp = p * mv;
+    mat4 m = M, v = V, p = P, mv = v * m, mvp = p * mv;
 
     // Prepare vectors for multiplication
     vec4 msVertPos  = vec4(msVertexPosition, 1);
-    vec4 wsLightPos = vec4(wsLightPosition, 1);
 
     // Output position of the vertex, in clip space : MVP * position
     gl_Position = mvp * msVertPos;
 
     // Position of the vertex, in worldspace : M * position
     wsPosition = (m * msVertPos).xyz;
+    wsLightPosition = wsLightPos.xyz;
 
     // Vector that goes from the vertex to the camera, in camera space.
     // In camera space, the camera is at the origin (0,0,0).
@@ -74,3 +61,50 @@ void main(){
     // UV of the vertex. No special space for this one.
     uv = vertexUV;
 }
+
+
+
+// Helper functions
+
+float left (float val){ return texture(audioLeftData , val).r ; }
+float right(float val){ return texture(audioRightData, val).r ; }
+
+mat4 translate(float x, float y, float z){ return mat4(
+    1,0,0,0,
+    0,1,0,0,
+    0,0,1,0,
+    x,y,z,1
+); }
+
+mat4 scale(float x, float y, float z){ return  mat4(
+    x,0,0,0,
+    0,y,0,0,
+    0,0,z,0,
+    0,0,0,1
+); }
+
+mat4 scale(float s){ return scale(s,s,s); }
+
+mat4 rotateX(float a){ return mat4(
+    1, 0     , 0     , 0,
+    0, cos(a), sin(a), 0,
+    0,-sin(a), cos(a), 0,
+    0, 0     , 0     , 1
+
+); }
+
+mat4 rotateY(float a){ return mat4(
+     cos(a), 0, sin(a), 0,
+     0     , 1, 0     , 0,
+    -sin(a), 0, cos(a), 0,
+     0     , 0, 0     , 1
+
+); }
+
+mat4 rotateZ(float a){ return mat4(
+     cos(a), sin(a), 0, 0,
+    -sin(a), cos(a), 0, 0,
+     0     , 0     , 1, 0,
+     0     , 0     , 0, 1
+
+); }
