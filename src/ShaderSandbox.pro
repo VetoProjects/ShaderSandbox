@@ -1,3 +1,7 @@
+#
+# This is the project file for the ShaderSandbox project
+# Created by VeTo, 2015
+#
 isEqual(QT_MAJOR_VERSION, 4) || isEqual(QT_MINOR_VERSION, 1) {
     message("Cannot build ShaderSandbox with Qt version $$QT_VERSION.")
     error("Use at least Qt 5.2.")
@@ -25,24 +29,8 @@ QMAKE_EXTRA_TARGETS += valgrind-check
 
 CONFIG+=c++11 no_keywords
 
-valgrind-check.depends = check
-valgrind-check.commands = valgrind ./$$TARGET
-
 RESOURCES += \
     ../application.qrc
-
-translations.target = $$OUT_PWD/translations
-src = $$PWD/../translations
-win32 {
-    translations.target ~= s,/,\\,g
-    src ~= s,/,\\,g
-}
-translations.commands = $(COPY_DIR) \"$$src\" \"$$translations.target\"
-first.depends = $(first) translations
-export(first.depends)
-export(translations.commands)
-
-QMAKE_EXTRA_TARGETS += first translations
 
 HEADERS += Instances/IInstance.hpp \
     Instances/WindowInstance.hpp \
@@ -76,3 +64,18 @@ SOURCES += Instances/WindowInstance.cpp \
     Model3D.cpp
 
 
+valgrind-check.depends = check
+valgrind-check.commands = valgrind ./$$TARGET
+
+translations.target = $$OUT_PWD/translations
+src = $$PWD/../translations
+win32 {
+    translations.target ~= s,/,\\,g
+    src ~= s,/,\\,g
+}
+translations.commands = $(COPY_DIR) \"$$src\" \"$$translations.target\"
+first.depends = $(first) translations
+export(first.depends)
+export(translations.commands)
+
+QMAKE_EXTRA_TARGETS += first translations
