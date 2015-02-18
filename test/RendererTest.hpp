@@ -27,7 +27,8 @@ private slots:
                 this, SLOT(finishedTest(GlLiveThread*, QString, int)));
         connect(thread, SIGNAL(doneSignal(GlLiveThread*, QString)),
                  this, SLOT(doneTest(GlLiveThread*, QString)));
-        thread->initialize("This is not valid code;", "This as well");
+        auto runObj = new Renderer("this is not valid code", "this as well");
+        thread->initialize(runObj);
         thread->start();
         QTest::qWait(1000);
         thread->terminate();
@@ -37,7 +38,8 @@ private slots:
                 this, SLOT(finishedCommandTest(GlLiveThread*, QString, int)));
         connect(thread, SIGNAL(doneSignal(GlLiveThread*, QString)),
                  this, SLOT(doneTest(GlLiveThread*, QString)));
-        thread->initialize("#version 330 core", "#version 330 core");
+        auto runObj = new Renderer("#version 330 core", "#version 330 core");
+        thread->initialize(runObj);
         thread->start();
         QTest::qWait(1000);
         thread->terminate();
