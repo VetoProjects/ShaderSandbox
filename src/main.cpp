@@ -32,9 +32,9 @@ int main(int argc, char *argv[]){
     if(QFontDatabase::addApplicationFont(":/fonts/Inconsolata.otf") == -1)
         qWarning() << a.tr("Failed to load font Inconsolata.");
 
-    QString language = QLocale::system().name();
+    auto language = QLocale::system().name();
     language.chop(3);
-    QDir dir = Backend::directoryOf(QStringLiteral(""));
+    auto dir = Backend::directoryOf(QStringLiteral(""));
 
     QTranslator translator;
     translator.load(dir.absoluteFilePath("translations/codeeditor_" + language));
@@ -42,9 +42,7 @@ int main(int argc, char *argv[]){
 
     Backend server(&a);
 
-    QList<int> ids;
-
-    ids = server.loadIds();
+    auto ids = server.loadIds();
 
     if(ids.length() == 0)
         ids.append(server.nextID());
@@ -54,7 +52,8 @@ int main(int argc, char *argv[]){
         Instances::WindowInstance *instance = new Instances::WindowInstance(id, settings, &server);
         server.addInstance(instance, false);
     }
-    BootLoader *bootLoader = new BootLoader(socketName, &server);
+
+    auto *bootLoader = new BootLoader(socketName, &server);
     bootLoader->start();
 
     QFile style(dir.absoluteFilePath("style/default.css"));

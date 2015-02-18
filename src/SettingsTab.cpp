@@ -43,7 +43,7 @@ void LayoutTab::addLayout() noexcept{
 
     designBoxLabel = new QLabel(tr("Design:"));
     designBox = new QComboBox;
-    QString designConfig = settings->value("Design").toString();
+    auto designConfig = settings->value("Design").toString();
     for(auto style : QStyleFactory::keys()){
         designBox->addItem(style);
         if(designConfig == style)
@@ -68,7 +68,7 @@ void LayoutTab::addLayout() noexcept{
     hlBox->addItem(tr("Variable Names"));    
     hlBox->addItem(tr("None"));
 
-    int hlConfig = settings->value("Highlighting").toInt();
+    auto hlConfig = settings->value("Highlighting").toInt();
     if(hlConfig >= 0 && hlConfig <= 2)
         hlBox->setCurrentIndex(hlConfig);
 
@@ -91,7 +91,7 @@ void LayoutTab::addLayout() noexcept{
     languageBox->addItem(tr("English"));
     languageBox->addItem(tr("German"));
 
-    int languageConfig = settings->value("Language").toInt();
+    auto languageConfig = settings->value("Language").toInt();
     if(languageConfig >= 0 || languageConfig <= 1)
         languageBox->setCurrentIndex(languageConfig);
 

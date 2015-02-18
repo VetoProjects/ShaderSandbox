@@ -77,17 +77,17 @@ void ObjectLoaderDialog::setupFileChooser() noexcept{
 }
 
 void ObjectLoaderDialog::selectFile() noexcept{
-    QString filename = QFileDialog::getOpenFileName(this);
+    auto filename = QFileDialog::getOpenFileName(this);
     if(filename != "") fileNameBox->setText(filename);
 }
 
 QVBoxLayout* ObjectLoaderDialog::setupLoaderLayout() noexcept{
-    QHBoxLayout* fileLayout = new QHBoxLayout();
+    auto fileLayout = new QHBoxLayout();
 
     fileLayout->addWidget(fileNameBox);
     fileLayout->addWidget(fileChoosingButton);
 
-    QHBoxLayout* offsetLayout = new QHBoxLayout();
+    auto offsetLayout = new QHBoxLayout();
     offsetLayout->addSpacing(5);
     offsetLayout->addWidget(new QLabel("x:"));
     offsetLayout->addWidget(offsetBoxX);
@@ -96,7 +96,7 @@ QVBoxLayout* ObjectLoaderDialog::setupLoaderLayout() noexcept{
     offsetLayout->addWidget(new QLabel("z:"));
     offsetLayout->addWidget(offsetBoxZ);
 
-    QHBoxLayout* scalingLayout = new QHBoxLayout();
+    auto scalingLayout = new QHBoxLayout();
     scalingLayout->addSpacing(5);
     scalingLayout->addWidget(new QLabel("x:"));
     scalingLayout->addWidget(scalingBoxX);
@@ -105,7 +105,7 @@ QVBoxLayout* ObjectLoaderDialog::setupLoaderLayout() noexcept{
     scalingLayout->addWidget(new QLabel("z:"));
     scalingLayout->addWidget(scalingBoxZ);
 
-    QHBoxLayout* rotationLayout = new QHBoxLayout();
+    auto rotationLayout = new QHBoxLayout();
     rotationLayout->addSpacing(5);
     rotationLayout->addWidget(new QLabel("x:"));
     rotationLayout->addWidget(rotationBoxX);
@@ -114,7 +114,7 @@ QVBoxLayout* ObjectLoaderDialog::setupLoaderLayout() noexcept{
     rotationLayout->addWidget(new QLabel("z:"));
     rotationLayout->addWidget(rotationBoxZ);
 
-    QVBoxLayout* coordinateLayout = new QVBoxLayout();
+    auto coordinateLayout = new QVBoxLayout();
     coordinateLayout->addWidget(new QLabel("Offset of Object:"));
     coordinateLayout->addLayout(offsetLayout);
     coordinateLayout->addWidget(new QLabel("Scale of Object:"));
@@ -122,7 +122,7 @@ QVBoxLayout* ObjectLoaderDialog::setupLoaderLayout() noexcept{
     coordinateLayout->addWidget(new QLabel("Rotation of Object:"));
     coordinateLayout->addLayout(rotationLayout);
 
-    QVBoxLayout* mainLayout = new QVBoxLayout();
+    auto mainLayout = new QVBoxLayout();
     mainLayout->addWidget(new QLabel("Path of object to render:"));
     mainLayout->addSpacing(5);
     mainLayout->addLayout(fileLayout);
@@ -149,7 +149,7 @@ void ObjectLoaderDialog::setData(const QString &modelFile, const QVector3D &mode
 }
 
 void ObjectLoaderDialog::load() noexcept{
-    QString objectFile = fileNameBox->text();
+    auto objectFile = fileNameBox->text();
     if(objectFile.isEmpty()){
         QMessageBox::warning(this, tr("ShaderSandbox"), "File name cannot be empty.");
         return;

@@ -21,7 +21,6 @@ QVariant SettingsBackend::getSettingsFor(const QString key,
     QString relevantSubdir(globalDir + "/" + QString::number(id));
     QSettings set(globalName, relevantSubdir);
     return set.value(key, defaultOption);
-
 }
 
 /**
@@ -34,8 +33,7 @@ QVariant SettingsBackend::getSettingsFor(const QString key,
  * settings for the key or returns defaultOption.
  */
 QVariant SettingsBackend::getSettingsFor(const QString key, const QVariant &defaultOption) noexcept{
-    QSettings settings(globalName, globalDir);
-    return settings.value(key, defaultOption);
+    return QSettings(globalName, globalDir).value(key, defaultOption);
 }
 
 /**

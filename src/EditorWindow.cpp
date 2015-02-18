@@ -116,13 +116,13 @@ void EditorWindow::newFile() noexcept{
     QStringList editor;
     bool ok;
     editor << "Both" << "VertexShader" << "FragmentShader";
-    QString choice = QInputDialog::getItem(this, "Which file do you want to save", "Files: ", editor, 0, false, &ok);
+    auto choice = QInputDialog::getItem(this, "Which file do you want to save", "Files: ", editor, 0, false, &ok);
 
     if(!ok) return;
 
     if(choice == "VertexShader" || choice == "Both"){
         if(vertexCodeEditor->document()->isModified()) {
-            QMessageBox::StandardButton question = QMessageBox::warning(this,
+            auto question = QMessageBox::warning(this,
                 tr("ShaderSandbox"),
                 tr("The vertex shader have been modified but are unsaved.\n"
                    "Do you want to save your changes?"),
@@ -139,7 +139,7 @@ void EditorWindow::newFile() noexcept{
 
     if(choice == "FragmentShader" || choice == "Both"){
         if(fragmentCodeEditor->document()->isModified()){
-            QMessageBox::StandardButton question = QMessageBox::warning(this,
+            auto question = QMessageBox::warning(this,
                 tr("ShaderSandbox"),
                 tr("The fragment shader have been modified but are unsaved.\n"
                    "Do you want to save your changes?"),
@@ -163,7 +163,7 @@ void EditorWindow::newFile() noexcept{
  */
 void EditorWindow::openFile() noexcept{
     if(saveDialog()){
-        QString fileName = QFileDialog::getOpenFileName(this);
+        auto fileName = QFileDialog::getOpenFileName(this);
         if (!fileName.isEmpty())
             loadFile(fileName);
     }
@@ -266,8 +266,8 @@ void EditorWindow::highlightErroredFragmentLine(int lineno) noexcept{
  */
 void EditorWindow::applySettings(const QHash<QString, QVariant> &settings) noexcept{
     if(settings.value("RememberSize").toBool()){
-        const QPoint  pos  = settings.value("pos", QPoint(0, 0)).toPoint();
-        const QSize   size = settings.value("size", QSize(800, 600)).toSize();
+        auto pos  = settings.value("pos", QPoint(0, 0)).toPoint();
+        auto size = settings.value("size", QSize(800, 600)).toSize();
         move(pos);
         resize(size);
     }
@@ -447,8 +447,7 @@ void EditorWindow::addStatusBar() noexcept{
  */
 bool EditorWindow::saveDialog() noexcept{
     if(vertexCodeEditor->document()->isModified() || fragmentCodeEditor->document()->isModified()){
-        QMessageBox::StandardButton question;
-        question = QMessageBox::warning(this, tr("ShaderSandbox"),
+        auto question = QMessageBox::warning(this, tr("ShaderSandbox"),
                                 tr("The documents have been modified"
                                    " but are unsaved.\n"
                                 "Do you want to save your changes?"),
@@ -470,15 +469,15 @@ bool EditorWindow::saveDialog() noexcept{
  */
 void EditorWindow::loadFile(const QString &path, bool v, bool f) noexcept{
     QFileInfo fileInfo(path);
-    QString suffix = fileInfo.suffix().toLower();
-    bool vertexFile = !f && (v || suffix == "vs" || suffix == "vert" || suffix == "vertex" || suffix == "vertexshader");
-    bool fragmentFile = !v && (f || suffix == "fs" || suffix == "frag" || suffix == "fragment" || suffix == "fragmentshader");
+    auto suffix = fileInfo.suffix().toLower();
+    auto vertexFile = !f && (v || suffix == "vs" || suffix == "vert" || suffix == "vertex" || suffix == "vertexshader");
+    auto fragmentFile = !v && (f || suffix == "fs" || suffix == "frag" || suffix == "fragment" || suffix == "fragmentshader");
 
     if(!vertexFile && !fragmentFile){
         QStringList editor;
         bool ok;
         editor << "VertexShader" << "FragmentShader";
-        QString choice = QInputDialog::getItem(this, "Which file do you want to load", "Files: ", editor, 0, false, &ok);
+        auto choice = QInputDialog::getItem(this, "Which file do you want to load", "Files: ", editor, 0, false, &ok);
 
         if(!ok) return;
         if(choice == "VertexShader")
@@ -490,7 +489,7 @@ void EditorWindow::loadFile(const QString &path, bool v, bool f) noexcept{
     QFile file(path);
     //display an error message if the file cannot be opened and why
     if(!file.open(QFile::ReadOnly | QFile::Text)){
-        QString msg = tr("Cannot read file %1:\n%2.").arg(path).arg(file.errorString());
+        auto msg = tr("Cannot read file %1:\n%2.").arg(path).arg(file.errorString());
         QMessageBox::warning(this, tr("ShaderSandbox"), msg);
         return;
     }
@@ -533,7 +532,7 @@ bool EditorWindow::saveFile() noexcept{
     QStringList editor;
     bool ok;
     editor << "Both" << "VertexShader" << "FragmentShader";
-    QString choice = QInputDialog::getItem(this, "Which file do you want to save", "Files: ", editor, 0, false, &ok);
+    auto choice = QInputDialog::getItem(this, "Which file do you want to save", "Files: ", editor, 0, false, &ok);
 
     if(!ok) return false;
 

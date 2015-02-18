@@ -44,7 +44,7 @@ Backend::~Backend(){
  * in the list so that the two correlate.
  */
 void Backend::addInstance(IInstance *instance, bool removeSettings) noexcept{
-    int id = instance->ID;
+    auto id = instance->ID;
     if(instances.contains(id))
         return;
     if(removeSettings)
@@ -73,7 +73,7 @@ void Backend::addInstance(IInstance *instance, bool removeSettings) noexcept{
  * Look up the first free ID for a new Instance.
  */
 int Backend::nextID() noexcept{
-    int id = 0;
+    auto id = 0;
     while(ids.contains(id))
         ++id;
     return id;
@@ -88,7 +88,7 @@ int Backend::nextID() noexcept{
  */
 QList<int> Backend::loadIds() noexcept
 {
-    QVariantList ids = SettingsBackend::getSettingsFor(QStringLiteral("Instances"), QVariantList()).toList();
+    auto ids = SettingsBackend::getSettingsFor(QStringLiteral("Instances"), QVariantList()).toList();
     QList<int> res;
     for(auto id : ids){
         bool ok;
@@ -121,7 +121,7 @@ void Backend::instanceClosing(IInstance *instance) noexcept
  */
 void Backend::instanceDestroyed(QObject *instance) noexcept
 {
-    int id = ((IInstance*)instance)->ID;
+    auto id = ((IInstance*)instance)->ID;
     instances.remove(id);
     removeInstance(id, false);
 }
@@ -169,7 +169,7 @@ bool Backend::removeInstance(int id, bool removeSettings) noexcept{
  * will tell all the children to terminate.
  */
 void Backend::childSaidCloseAll() noexcept{
-    QList<int> notRemoved = ids;
+    auto notRemoved = ids;
     for(auto id : ids){
         disconnect(instances[id].get(), &IInstance::destroyed, this, &Backend::instanceDestroyed);
         if(removeInstance(id, false))
@@ -301,7 +301,7 @@ bool Backend::isLast() noexcept{
  */
 void Backend::instanceRunCode(IInstance *instance) noexcept
 {
-    long id = instance->ID;
+    auto id = instance->ID;
     if(threads.contains(id)){
         bool worked = threads[id]->updateCode(instance->vertexSourceCode(), instance->fragmentSourceCode());
         if(!worked){
@@ -417,7 +417,7 @@ void Backend::runGlFile(IInstance *instance) noexcept{
     connect(thread.get(), &GlLiveThread::errorSignal, this, &Backend::getError);
     connect(thread.get(), &GlLiveThread::vertexError,   this, &Backend::getVertexError);
     connect(thread.get(), &GlLiveThread::fragmentError, this, &Backend::getFragmentError);
-    Renderer* runObj = new Renderer(instance->vertexSourceCode(), instance->fragmentSourceCode());
+    auto runObj = new Renderer(instance->vertexSourceCode(), instance->fragmentSourceCode());
     runObj->resize(800, 600);
     runObj->show();
     thread->initialize(runObj);

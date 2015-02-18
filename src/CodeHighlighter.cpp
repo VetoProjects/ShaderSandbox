@@ -33,7 +33,7 @@ void CodeHighlighter::setupHighlighting() noexcept{
     rule.format.setForeground(Qt::blue); // rule.format already freshly initialized
 //    rule.format.setFontWeight(QFont::Bold);
     QStringList keywordPatterns;
-    QString keywords = QTextStream(&highlighting).readAll();
+    auto keywords = QTextStream(&highlighting).readAll();
     for(auto in: keywords.split("\n")){
         if(in != "")
             keywordPatterns << in;
@@ -60,7 +60,7 @@ void CodeHighlighter::setupHighlighting() noexcept{
     rule.pattern = QRegExp("\\b[0-9]+|[0-9]*\\.[0-9]+\\b");
     Rules.append(rule);
 
-    QString filename = QFileInfo(highlighting.fileName()).fileName();
+    auto filename = QFileInfo(highlighting.fileName()).fileName();
 
     // Single line comment
     rule.format = QTextCharFormat();
@@ -114,9 +114,9 @@ void CodeHighlighter::highlightBlock(const QString &text) noexcept{
      */
     for(auto &rule: Rules){
         QRegExp regEx(rule.pattern);
-        int i = regEx.indexIn(text);
+        auto i = regEx.indexIn(text);
         while(i >= 0){
-            int length = regEx.matchedLength();
+            auto length = regEx.matchedLength();
             setFormat(i, length, rule.format);
             i = regEx.indexIn(text, i + length);
         }
@@ -135,13 +135,13 @@ void CodeHighlighter::highlightBlock(const QString &text) noexcept{
     *      ei = end index
     *      commentLen = length of the comment(i.e. offset ; needed?)
     */
-    int si = 0;
+    auto si = 0;
     if(previousBlockState() != 1)
         si = commentStartExpression.indexIn(text);
 
     // TODO: don't trust the preview format
     while(si >= 0 && this->format(si) != multiLineCommentNotation){
-        int ei = commentEndExpression.indexIn(text, si);
+        auto ei = commentEndExpression.indexIn(text, si);
         int commentLen;
         if(ei == -1){
             setCurrentBlockState(1);

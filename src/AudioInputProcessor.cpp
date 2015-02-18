@@ -3,7 +3,7 @@
 AudioInputProcessor::AudioInputProcessor(QObject *parent) :
     QIODevice(parent)
 {
-    QAudioDeviceInfo inputDevice = QAudioDeviceInfo::defaultInputDevice();
+    auto inputDevice = QAudioDeviceInfo::defaultInputDevice();
     for(auto &dev : QAudioDeviceInfo::availableDevices(QAudio::AudioInput)){
         if(dev.deviceName().contains("output", Qt::CaseInsensitive)){
             inputDevice = dev;

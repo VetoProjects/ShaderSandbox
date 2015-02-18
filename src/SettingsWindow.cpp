@@ -19,23 +19,23 @@ SettingsWindow::SettingsWindow(int subDirNum){
     tabs->addTab(behaviour, "Behaviour");
     connect(behaviour, &BehaviourTab::contentChanged, this, &SettingsWindow::changedTrue);
 
-    QHBoxLayout* horizontal = new QHBoxLayout;
+    auto horizontal = new QHBoxLayout;
     horizontal->addWidget(tabs, 1);
 
-    QPushButton* applyBut = new QPushButton(tr("Apply Changes"));
-    QPushButton* applycloseBut = new QPushButton(tr("Apply and Exit"));
-    QPushButton* closeBut = new QPushButton(tr("Close"));
+    auto applyBut = new QPushButton(tr("Apply Changes"));
+    auto applycloseBut = new QPushButton(tr("Apply and Exit"));
+    auto closeBut = new QPushButton(tr("Close"));
     connect(applyBut, &QPushButton::clicked, this, &SettingsWindow::apply);
     connect(applycloseBut, &QPushButton::clicked, this, &SettingsWindow::applyClose);
     connect(closeBut, &QPushButton::clicked, this, &SettingsWindow::tryClose);
 
-    QHBoxLayout* buttons = new QHBoxLayout;
+    auto buttons = new QHBoxLayout;
     buttons->addStretch(1);
     buttons->addWidget(applyBut);
     buttons->addWidget(applycloseBut);
     buttons->addWidget(closeBut);
 
-    QVBoxLayout* main = new QVBoxLayout;
+    auto main = new QVBoxLayout;
     main->addLayout(horizontal);
     main->addStretch(1);
     main->addSpacing(12);
@@ -98,8 +98,7 @@ void SettingsWindow::applyClose() noexcept{
  */
 void SettingsWindow::tryClose() noexcept{
     if(changed){
-        QMessageBox::StandardButton question;
-        question = QMessageBox::warning(this, tr("VeToLC"),
+        auto question = QMessageBox::warning(this, tr("VeToLC"),
                                 tr("The settings have been modified"
                                    " but are unsaved.\n"
                                 "Do you want to save your changes?"),
